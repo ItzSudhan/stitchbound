@@ -2,14 +2,14 @@
 // 1/60 s steps, and the screen state machine moves between title, play, draft, pause and over.
 // ?seed=N fixes a run; ?shot=<name> stages a screenshot scene (see shots.js); ?demo=1 lets the
 // autopilot play. window.__stitch exposes the state to the headless play-test tool.
-import { STEP, VIEW } from './config.js';
-import { createInput } from './input.js';
-import { createAudio } from './audio.js';
 import { createRun, stepRun, beginNextWave } from './game.js';
-import { drawScene } from './render.js';
+import { draftUpgrades, takeUpgrade } from './upgrades.js';
 import { drawHud } from './hud.js';
 import { drawDraft, drawPause, drawResults, drawTitle, draftCardRects } from './screens.js';
-import { draftUpgrades, takeUpgrade } from './upgrades.js';
+import { drawScene } from './render.js';
+import { createAudio } from './audio.js';
+import { createInput } from './input.js';
+import { STEP, VIEW } from './config.js';
 import { createPilot, pilotIntent, pilotPick } from './autopilot.js';
 import { readBest, recordScore } from './storage.js';
 import { summarizeRun } from './summary.js';

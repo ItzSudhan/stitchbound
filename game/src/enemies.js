@@ -5,15 +5,15 @@
 //   snipper    an earwig that hunts your thread and snips it
 //   spitter    a walking pincushion that fires fans of pins
 // The Yarn Wyrm and the Moth Matriarch live in bosses.js.
-import { VIEW } from './config.js';
-import { angleDelta, clamp, distance } from './geometry.js';
-import { nibblePatch, patchAt } from './quilt.js';
+import { updateMatriarch, updateWyrmHead, updateWyrmSegment } from './bosses.js';
+import { nibblePatch } from './quilt.js';
 import { cutThread } from './thread.js';
 import { spawnShot } from './projectiles.js';
 import { hurtPlayer } from './player.js';
 import { addShake, burst, floatText, ring } from './effects.js';
 import { registerKill } from './scoring.js';
-import { updateMatriarch, updateWyrmHead, updateWyrmSegment } from './bosses.js';
+import { VIEW } from './config.js';
+import { angleDelta, clamp, distance } from './geometry.js';
 
 export const ENEMY_KINDS = {
   moth: { hp: 18, r: 17, speed: 92, score: 100, colors: ['#9c7bb0', '#5e4170', '#e8d9b5'] },

@@ -2,15 +2,15 @@
 // moves the needle, lays its thread and cinches any loop it closes, moves the pests, pins and
 // shots, and decides the outcome: win after the tenth night, lose when the needle's spools run out
 // or the quilt unravels.
-import { PALETTE } from './config.js';
-import { createRandom } from './random.js';
 import { createQuilt, mendInside, quiltIntegrity, updateQuilt } from './quilt.js';
 import { createThread, extendThread, threadTouches, updateThread } from './thread.js';
-import { createPlayer, buttonPositions, updatePlayer } from './player.js';
-import { updatePins, updateShots } from './projectiles.js';
 import { damageEnemy, updateEnemies } from './enemies.js';
 import { startWave, updateWaves } from './waves.js';
 import { computeMods } from './upgrades.js';
+import { createPlayer, buttonPositions, updatePlayer } from './player.js';
+import { updatePins, updateShots } from './projectiles.js';
+import { PALETTE } from './config.js';
+import { createRandom } from './random.js';
 import { createCombo, addBonus, updateCombo } from './scoring.js';
 import { createEffects, addShake, burst, floatText, hitStop, ring, screenFlash, updateEffects } from './effects.js';
 import { distance, easeInCubic, pointInPolygon, polygonArea, polygonCentroid } from './geometry.js';

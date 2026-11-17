@@ -1,9 +1,9 @@
 // The heirloom quilt the whole game is played on: 160 felt patches, each with its own fabric
 // pattern, that moths eat into holes and that closed thread loops mend. The whole quilt is painted
 // once to an offscreen canvas; only the damage on top of it is drawn each frame.
-import { PALETTE, PATCH, PATCH_COLORS, QUILT_BUDGET, VIEW } from './config.js';
-import { createRandom } from './random.js';
 import { clamp, pointInPolygon, TAU } from './geometry.js';
+import { createRandom } from './random.js';
+import { PALETTE, PATCH, PATCH_COLORS, QUILT_BUDGET, VIEW } from './config.js';
 
 const PATTERNS = ['plain', 'gingham', 'dots', 'stripes', 'flowers', 'chevron', 'cross', 'plain'];
 
