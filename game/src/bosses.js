@@ -70,6 +70,15 @@ export function spawnMatriarch(run) {
   return boss;
 }
 
+/** Calls a ring of guard moths that circle the Matriarch until they are stitched or she falls. */
+function summonGuards(run, boss, count) {
+  for (let i = 0; i < count; i += 1) {
+    const orbit = (i / count) * TAU;
+    spawnEnemy(run, 'moth', boss.x + Math.cos(orbit) * 150, boss.y + Math.sin(orbit) * 115, { guard: boss, orbit });
+  }
+  run.events.push({ type: 'summon' });
+}
+
 function matriarchPhase(boss) {
   const f = boss.hp / boss.maxHp;
   return f > 0.66 ? 1 : f > 0.33 ? 2 : 3;
@@ -83,12 +92,14 @@ export function updateMatriarch(run, boss, dt) {
     if (boss.y > 220) {
       boss.entering = false;
       boss.passive = false;
+      summonGuards(run, boss, 6);
     }
     return;
   }
   const phase = matriarchPhase(boss);
   if (phase !== boss.phase) {
     boss.phase = phase;
+    summonGuards(run, boss, phase === 3 ? 8 : 7);
     run.events.push({ type: 'phase' });
     screenFlash(run.fx, '#f5c542', 0.6);
     addShake(run.fx, 18);
@@ -115,7 +126,7 @@ export function updateMatriarch(run, boss, dt) {
   boss.summonTimer -= dt;
   if (boss.summonTimer <= 0) {
     const kind = phase === 3 ? 'silverfish' : 'moth';
-    const count = phase === 3 ? 5 : 3;
+    const count = phase === 3 ? 6 : 4;
     for (let i = 0; i < count; i += 1) {
       const a = (i / count) * TAU + t;
       spawnEnemy(run, kind, boss.x + Math.cos(a) * 90, boss.y + Math.sin(a) * 60);

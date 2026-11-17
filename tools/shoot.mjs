@@ -1,6 +1,6 @@
 // Captures the screenshots listed in shots.json from the game's own ?shot= scenes, at 1280x800,
 // as JPEGs under 256 KiB (lowering quality only if a frame is too big).
-//   node tools/shoot.mjs [out dir, default screenshots]
+//   node tools/shoot.mjs [out dir, default screenshots] [shot list, default shots.json]
 import { readFileSync, mkdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { launchChrome, startServer } from './chrome.mjs';
@@ -8,7 +8,8 @@ import { launchChrome, startServer } from './chrome.mjs';
 const PORT = 8127;
 const LIMIT = 256 * 1024;
 const outDir = process.argv[2] ?? 'screenshots';
-const shots = JSON.parse(readFileSync(new URL('../shots.json', import.meta.url), 'utf8'));
+const listFile = process.argv[3] ?? new URL('../shots.json', import.meta.url);
+const shots = JSON.parse(readFileSync(listFile, 'utf8'));
 
 mkdirSync(outDir, { recursive: true });
 const server = await startServer(PORT);
@@ -28,6 +29,6 @@ try {
   }
   if (chrome.errors.length) console.log('page errors:', chrome.errors);
 } finally {
-  await chrome.close();
   server.kill();
+  await chrome.close();
 }

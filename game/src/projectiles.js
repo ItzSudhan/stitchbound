@@ -78,7 +78,7 @@ function redirectPin(run, pin) {
 
 /** A creature's shot: 'dust' is a slow moth-dust mote, 'pin' a fast pincushion pin. */
 export function spawnShot(run, x, y, angle, speed, kind = 'dust') {
-  run.shots.push({ x, y, vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed, r: kind === 'dust' ? 9 : 6, kind, life: 6, spin: 0 });
+  run.shots.push({ x, y, vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed, r: kind === 'dust' ? 10 : 6, kind, life: 6, spin: 0 });
 }
 
 /** A ring of shots, evenly spaced, starting at `offset`. */

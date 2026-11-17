@@ -31,6 +31,6 @@ try {
   }
   if (chrome.errors.length) console.log('page errors:', chrome.errors);
 } finally {
-  await chrome.close();
   server.kill();
+  await chrome.close();
 }

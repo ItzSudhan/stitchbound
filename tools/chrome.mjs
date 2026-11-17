@@ -142,6 +142,13 @@ export async function launchChrome({ width = 1280, height = 800 } = {}) {
 /** Starts serve.ts on a port and resolves once it is listening. */
 export async function startServer(port) {
   const proc = spawn(process.execPath, ['serve.ts', '--port', String(port)], { cwd: new URL('..', import.meta.url).pathname });
-  await new Promise((resolve) => proc.stdout.once('data', resolve));
+  let errText = '';
+  proc.stderr.on('data', (chunk) => {
+    errText += chunk;
+  });
+  await new Promise((resolve, reject) => {
+    proc.stdout.once('data', resolve);
+    proc.once('exit', (code) => reject(new Error(`serve.ts exited (${code}): ${errText.slice(0, 400)}`)));
+  });
   return proc;
 }

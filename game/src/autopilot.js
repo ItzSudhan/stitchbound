@@ -18,7 +18,7 @@ function pickFocus(run) {
   const live = run.enemies.filter((e) => !e.dead && e.kind !== 'wyrmSegment' && e.x > 0 && e.y > 0 && e.x < VIEW.width && e.y < VIEW.height);
   if (live.length === 0) return null;
   const boss = live.find((e) => e.kind === 'matriarch' && !e.entering);
-  if (boss) return { x: boss.x, y: boss.y, radius: boss.r + 70 };
+  if (boss) return { x: boss.x, y: boss.y, radius: boss.r + 125 };
   const eaters = live.filter((e) => e.state === 'eat');
   const pool = eaters.length > 0 ? eaters : live;
   const p = run.player;
@@ -52,6 +52,30 @@ export function pilotIntent(run, pilot, dt) {
   const push = Math.min(1, len / 24);
   mx = (mx / len) * push;
   my = (my / len) * push;
+
+  // Shy away from incoming shots and from pests that bite on contact.
+  let ax = 0;
+  let ay = 0;
+  for (const s of run.shots) {
+    const d = distance(s.x, s.y, p.x, p.y);
+    if (d < 110 && d > 0) {
+      const w = (110 - d) / 110;
+      ax += ((p.x - s.x) / d) * w * 2;
+      ay += ((p.y - s.y) / d) * w * 2;
+    }
+  }
+  for (const e of run.enemies) {
+    if (e.dead || e.kind === 'moth' || e.passive) continue;
+    const d = distance(e.x, e.y, p.x, p.y);
+    const reach = e.r + 70;
+    if (d < reach && d > 0) {
+      const w = (reach - d) / reach;
+      ax += ((p.x - e.x) / d) * w * 2.5;
+      ay += ((p.y - e.y) / d) * w * 2.5;
+    }
+  }
+  mx += ax;
+  my += ay;
 
   let aimX = tx;
   let aimY = ty;

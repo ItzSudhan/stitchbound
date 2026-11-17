@@ -20,17 +20,19 @@ function inked(ctx, fill, width = 2.5) {
   ctx.stroke();
 }
 
+/** The white hit-blink: only the first instant after a hit, so steady fire never bleaches a creature. */
 function flashOver(ctx, enemy) {
-  return enemy.flash > 0.5 ? '#ffffff' : null;
+  return enemy.flash > 0.82 ? '#fff4e0' : null;
 }
 
 /** The player: a silver needle, eye at the back, its red thread trailing from the eye. */
 export function drawNeedle(ctx, p, time) {
   if (p.invuln > 0 && p.dashTimer <= 0 && Math.floor(time * 20) % 2 === 0) ctx.globalAlpha = 0.45;
-  drawShadow(ctx, p.x, p.y, 22, 9);
+  drawShadow(ctx, p.x, p.y, 28, 11);
   ctx.save();
   ctx.translate(p.x, p.y);
   ctx.rotate(p.angle);
+  ctx.scale(1.3, 1.3);
   const grad = ctx.createLinearGradient(0, -6, 0, 6);
   grad.addColorStop(0, '#ffffff');
   grad.addColorStop(0.45, PALETTE.steel);
@@ -387,14 +389,27 @@ export function drawMatriarch(ctx, e, time) {
   ctx.beginPath();
   ctx.ellipse(0, r * 0.2, r * 0.34, r * 0.95, 0, 0, TAU);
   inked(ctx, flash ?? '#6b4b45', 3);
+  // A cream fur collar, then a plum head with two great golden eyes.
   ctx.beginPath();
-  ctx.arc(0, -r * 0.45, r * 0.42, 0, TAU);
+  for (let i = 0; i < 16; i += 1) {
+    const a = (i / 16) * TAU;
+    const rr = r * (i % 2 === 0 ? 0.5 : 0.4);
+    ctx.lineTo(Math.cos(a) * rr, -r * 0.3 + Math.sin(a) * rr * 0.7);
+  }
+  ctx.closePath();
   inked(ctx, flash ?? PALETTE.cream, 3);
-  ctx.fillStyle = INK;
   ctx.beginPath();
-  ctx.arc(-r * 0.16, -r * 0.62, r * 0.1, 0, TAU);
-  ctx.arc(r * 0.16, -r * 0.62, r * 0.1, 0, TAU);
-  ctx.fill();
+  ctx.ellipse(0, -r * 0.55, r * 0.36, r * 0.3, 0, 0, TAU);
+  inked(ctx, flash ?? '#3e2a4d', 3);
+  for (const side of [-1, 1]) {
+    ctx.beginPath();
+    ctx.ellipse(side * r * 0.17, -r * 0.6, r * 0.13, r * 0.11, side * 0.4, 0, TAU);
+    inked(ctx, PALETTE.gold, 2);
+    ctx.fillStyle = INK;
+    ctx.beginPath();
+    ctx.arc(side * r * 0.19, -r * 0.6, r * 0.05, 0, TAU);
+    ctx.fill();
+  }
   ctx.strokeStyle = PALETTE.goldDeep;
   ctx.lineWidth = 4;
   for (const side of [-1, 1]) {
@@ -467,10 +482,10 @@ export function drawShot(ctx, shot) {
     ctx.lineTo(shot.x + Math.cos(a) * rr, shot.y + Math.sin(a) * rr);
   }
   ctx.closePath();
-  inked(ctx, '#c8a8d8', 2.2);
-  ctx.fillStyle = '#f6ecd6';
+  inked(ctx, '#c46fcf', 2.5);
+  ctx.fillStyle = '#ffe9a8';
   ctx.beginPath();
-  ctx.arc(shot.x - 2, shot.y - 2, shot.r * 0.35, 0, TAU);
+  ctx.arc(shot.x - 1, shot.y - 1, shot.r * 0.42, 0, TAU);
   ctx.fill();
 }
 

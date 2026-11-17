@@ -112,7 +112,7 @@ function finishRun() {
 }
 
 function playerIntent(run) {
-  if (demo) return pilotIntent(run, state.pilot, STEP);
+  if (demo || window.__stitch.pilotOn) return pilotIntent(run, state.pilot, STEP);
   const move = input.moveVector();
   return {
     moveX: move.x,
@@ -255,6 +255,13 @@ window.addEventListener('resize', fitCanvas);
 window.__stitch = {
   state,
   startRun,
+  pilotOn: false,
+  /** Test hook: runs the game's own update for up to `seconds` of game time, stopping when the screen changes. */
+  fastForward(seconds) {
+    const from = state.screen;
+    for (let i = 0; i < seconds / STEP && state.screen === from; i += 1) update(STEP);
+    return state.screen;
+  },
   /** Test hook: jump the current run straight to night n. */
   skipToNight(n) {
     if (!state.run) startRun();

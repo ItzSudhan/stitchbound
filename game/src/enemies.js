@@ -23,7 +23,7 @@ export const ENEMY_KINDS = {
   spitter: { hp: 60, r: 23, speed: 42, score: 260, colors: ['#d6333f', '#94b283', '#f6ecd6'] },
   wyrm: { hp: 420, r: 27, speed: 150, score: 2000, colors: ['#e07a5f', '#f4a7a1', '#f6ecd6'] },
   wyrmSegment: { hp: 70, r: 21, speed: 0, score: 120, colors: ['#e07a5f', '#f2cc8f'] },
-  matriarch: { hp: 2800, r: 72, speed: 70, score: 10000, colors: ['#5e4170', '#9c7bb0', '#f5c542', '#f6ecd6'] },
+  matriarch: { hp: 3400, r: 72, speed: 70, score: 10000, colors: ['#5e4170', '#9c7bb0', '#f5c542', '#f6ecd6'] },
 };
 
 const BEHAVIOURS = {
@@ -158,7 +158,26 @@ function pickPatch(run, enemy) {
   return best;
 }
 
+/** A guard moth circles its Matriarch in a slow ring and dies with her. */
+function updateGuardMoth(run, enemy, dt) {
+  const boss = enemy.guard;
+  if (boss.dead) {
+    killEnemy(run, enemy, 'chain');
+    return;
+  }
+  enemy.orbit += dt * 1.3;
+  const tx = boss.x + Math.cos(enemy.orbit) * 150;
+  const ty = boss.y + Math.sin(enemy.orbit) * 115;
+  enemy.x += (tx - enemy.x) * Math.min(1, dt * 4);
+  enemy.y += (ty - enemy.y) * Math.min(1, dt * 4);
+  enemy.angle = enemy.orbit + Math.PI / 2;
+}
+
 function updateMoth(run, enemy, dt) {
+  if (enemy.guard) {
+    updateGuardMoth(run, enemy, dt);
+    return;
+  }
   if (!enemy.target || enemy.target.hp <= 0) {
     enemy.target = pickPatch(run, enemy);
     enemy.state = 'move';
