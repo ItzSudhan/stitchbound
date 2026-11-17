@@ -5,6 +5,7 @@ import { TAU } from './geometry.js';
 import { drawQuilt } from './quilt.js';
 import { cinchShape } from './game.js';
 import { buttonPositions } from './player.js';
+import { drawPickups } from './pickups.js';
 import { drawFloaters, drawParticles, drawRings, drawScreenFlash, shakeOffset } from './effects.js';
 import {
   drawBeetle,
@@ -30,6 +31,7 @@ export function drawScene(ctx, run, time) {
   drawCinches(ctx, run);
   drawThread(ctx, run, time);
   drawTelegraphs(ctx, run);
+  drawPickups(ctx, run, time);
   const enemies = [...run.enemies].sort((a, b) => DRAW_ORDER[a.kind] - DRAW_ORDER[b.kind] || (b.index ?? 0) - (a.index ?? 0));
   for (const enemy of enemies) drawEnemy(ctx, enemy, time);
   for (const shot of run.shots) drawShot(ctx, shot);

@@ -37,7 +37,12 @@ function pickFocus(run) {
 
 export function pilotIntent(run, pilot, dt) {
   const p = run.player;
-  const focus = pickFocus(run);
+  let focus = pickFocus(run);
+  // When hurt, detour for a spare spool that is close by.
+  if (p.hp < run.mods.hp) {
+    const spool = run.pickups.find((s) => distance(s.x, s.y, p.x, p.y) < 260);
+    if (spool) focus = { x: spool.x, y: spool.y, radius: 4 };
+  }
   const tx = focus ? focus.x : VIEW.width / 2;
   const ty = focus ? focus.y : VIEW.height / 2;
   const radius = focus ? focus.radius : 160;

@@ -12,6 +12,7 @@ import { spawnShot } from './projectiles.js';
 import { hurtPlayer } from './player.js';
 import { addShake, burst, floatText, ring } from './effects.js';
 import { registerKill } from './scoring.js';
+import { maybeDropSpool } from './pickups.js';
 import { VIEW } from './config.js';
 import { angleDelta, clamp, distance } from './geometry.js';
 
@@ -127,6 +128,7 @@ export function killEnemy(run, enemy, source) {
   ring(run.fx, enemy.x, enemy.y, def.colors[0], enemy.r * 3, 0.45, 5);
   addShake(run.fx, big ? 26 : 3);
   registerKill(run, enemy, source);
+  maybeDropSpool(run, enemy);
   run.events.push({ type: big ? 'bossDie' : 'kill', kind: enemy.kind });
   if (enemy.kind === 'wyrm') {
     for (const other of run.enemies) if (other.kind === 'wyrmSegment' && !other.dead) killEnemy(run, other, 'chain');

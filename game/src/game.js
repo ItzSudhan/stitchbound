@@ -9,6 +9,7 @@ import { startWave, updateWaves } from './waves.js';
 import { computeMods } from './upgrades.js';
 import { createPlayer, buttonPositions, updatePlayer } from './player.js';
 import { updatePins, updateShots } from './projectiles.js';
+import { updatePickups } from './pickups.js';
 import { PALETTE } from './config.js';
 import { createRandom } from './random.js';
 import { createCombo, addBonus, updateCombo } from './scoring.js';
@@ -30,6 +31,7 @@ export function createRun(seed) {
     player,
     pins: [],
     shots: [],
+    pickups: [],
     enemies: [],
     cinches: [],
     boss: null,
@@ -69,6 +71,7 @@ export function stepRun(run, intent, dt) {
     guardWithButtons(run, dt);
     updatePins(run, dt);
     updateShots(run, dt);
+    updatePickups(run, dt);
     updateWaves(run, dt);
   }
   updateThread(run.thread, dt);

@@ -1,6 +1,7 @@
 // The ten nights of the siege: which pests come, how many, and how fast. Each wave is a list of
 // groups [kind, count, seconds between, first delay]; waves 5 and 10 bring a boss.
-import { DAWN_MEND, WAVE_COUNT } from './config.js';
+import { DAWN_MEND, PALETTE, WAVE_COUNT } from './config.js';
+import { floatText } from './effects.js';
 import { spawnAtEdge } from './enemies.js';
 import { spawnMatriarch, spawnWyrm } from './bosses.js';
 import { darnAtDawn, quiltIntegrity } from './quilt.js';
@@ -64,7 +65,15 @@ export function updateWaves(run, dt) {
     addBonus(run, bonus, `NIGHT ${run.wave} CLEARED`, 640, 330);
     run.events.push({ type: 'waveClear' });
     if (run.wave >= WAVE_COUNT) run.outcome = 'win';
-    else run.stats.mended += darnAtDawn(run.quilt, DAWN_MEND);
+    else {
+      // Dawn: a little cloth is darned and one spool is wound back.
+      run.stats.mended += darnAtDawn(run.quilt, DAWN_MEND);
+      if (run.player.hp < run.mods.hp) {
+        run.player.hp += 1;
+        floatText(run.fx, run.player.x, run.player.y - 40, '+1 SPOOL', PALETTE.threadLight, 26);
+      }
+      run.events.push({ type: 'dawn' });
+    }
   } else if (run.wavePhase === 'cleared' && !run.outcome) {
     run.clearTimer -= dt;
     if (run.clearTimer <= 0) {

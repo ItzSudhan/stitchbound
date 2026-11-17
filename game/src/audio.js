@@ -125,6 +125,8 @@ export function createAudio() {
     lose: () => [7, 3, 0, -5].forEach((n, i) => tone(midi(57 + n), { type: 'triangle', dur: 0.45, vol: 0.2, at: i * 0.22 })),
     win: () => [0, 4, 7, 12, 7, 12, 16, 19].forEach((n, i) => tone(midi(64 + n), { dur: 0.35, vol: 0.2, at: i * 0.11 })),
     pause: () => tone(600, { type: 'sine', dur: 0.12, vol: 0.12 }),
+    pickup: () => [0, 5, 9].forEach((n, i) => tone(midi(79 + n), { type: 'sine', dur: 0.18, vol: 0.16, at: i * 0.04 })),
+    dawn: () => [0, 4, 7].forEach((n, i) => tone(midi(72 + n), { type: 'sine', dur: 0.5, vol: 0.12, at: 0.3 + i * 0.1 })),
   };
 
   /** One bar's worth of the tune: a plucked bass on the chord root and a pentatonic melody. */
