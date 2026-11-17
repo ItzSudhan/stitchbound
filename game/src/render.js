@@ -28,6 +28,7 @@ export function drawScene(ctx, run, time) {
   ctx.save();
   ctx.translate(shake.x, shake.y);
   drawQuilt(ctx, run.quilt);
+  drawNightShade(ctx, run);
   drawCinches(ctx, run);
   drawThread(ctx, run, time);
   drawTelegraphs(ctx, run);
@@ -45,6 +46,14 @@ export function drawScene(ctx, run, time) {
   drawFloaters(ctx, run.fx);
   ctx.restore();
   drawScreenFlash(ctx, run.fx, VIEW.width, VIEW.height);
+}
+
+/** The night deepens as the run goes on: evening on night 1, deep indigo by the Matriarch. */
+function drawNightShade(ctx, run) {
+  const depth = Math.max(0, run.wave - 1) / 9;
+  if (depth <= 0) return;
+  ctx.fillStyle = `rgba(28,20,64,${(0.26 * depth).toFixed(3)})`;
+  ctx.fillRect(-40, -40, VIEW.width + 80, VIEW.height + 80);
 }
 
 function drawEnemy(ctx, enemy, time) {
@@ -100,10 +109,10 @@ function drawThread(ctx, run, time) {
   ctx.restore();
   path();
   ctx.strokeStyle = PALETTE.ink;
-  ctx.lineWidth = 6.5;
+  ctx.lineWidth = 8;
   ctx.stroke();
   ctx.strokeStyle = PALETTE.thread;
-  ctx.lineWidth = 4;
+  ctx.lineWidth = 5;
   ctx.stroke();
   ctx.strokeStyle = 'rgba(255,190,190,0.85)';
   ctx.lineWidth = 1.5;
@@ -145,13 +154,13 @@ function drawCinches(ctx, run) {
     ctx.fillStyle = `rgba(245,197,66,${0.45 * (1 - t)})`;
     ctx.fill();
     ctx.strokeStyle = PALETTE.ink;
-    ctx.lineWidth = 8;
+    ctx.lineWidth = 10;
     ctx.stroke();
     ctx.strokeStyle = PALETTE.thread;
-    ctx.lineWidth = 5;
+    ctx.lineWidth = 6.5;
     ctx.stroke();
     ctx.strokeStyle = PALETTE.gold;
-    ctx.lineWidth = 2;
+    ctx.lineWidth = 2.5;
     ctx.setLineDash([8, 6]);
     ctx.stroke();
     ctx.setLineDash([]);
