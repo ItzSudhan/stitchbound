@@ -52,7 +52,7 @@ export function drawScene(ctx, run, time) {
 function drawNightShade(ctx, run) {
   const depth = Math.max(0, run.wave - 1) / 9;
   if (depth <= 0) return;
-  ctx.fillStyle = `rgba(28,20,64,${(0.26 * depth).toFixed(3)})`;
+  ctx.fillStyle = `rgba(28,20,64,${(0.2 * depth).toFixed(3)})`;
   ctx.fillRect(-40, -40, VIEW.width + 80, VIEW.height + 80);
 }
 
