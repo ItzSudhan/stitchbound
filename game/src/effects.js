@@ -36,7 +36,12 @@ export function ring(fx, x, y, color, radius = 60, life = 0.4, width = 6) {
 }
 
 export function floatText(fx, x, y, text, color = PALETTE.cream, size = 26) {
-  fx.floaters.push({ x, y, text, color, size, age: 0, life: 1.1 });
+  // Stack above any fresh text nearby so two numbers never run together.
+  let top = y;
+  for (const f of fx.floaters) {
+    if (f.age < 0.5 && Math.abs(f.x - x) < 90 && Math.abs(f.y - top) < size) top = f.y - size;
+  }
+  fx.floaters.push({ x, y: top, text, color, size, age: 0, life: 1.1 });
 }
 
 export function addShake(fx, amount) {

@@ -53,8 +53,9 @@ function playToBestFrame(seed, score) {
 
 /** How much is going on: a fresh cinch, flying shots, creatures and particles. */
 function spectacle(run) {
-  const fresh = run.cinches.some((c) => c.age > 0.04 && c.age < 0.16);
-  return (fresh ? 60 : 0) + Math.min(60, run.shots.length) * 0.8 + run.enemies.length * 2 + Math.min(300, run.fx.particles.length) * 0.05 + run.pins.length * 0.3;
+  const fresh = run.cinches.filter((c) => c.age > 0.04 && c.age < 0.16);
+  const caught = fresh.reduce((n, c) => n + c.caught, 0);
+  return (fresh.length > 0 ? 60 + caught * 18 : 0) +Math.min(60, run.shots.length) * 0.8 + run.enemies.length * 2 + Math.min(300, run.fx.particles.length) * 0.05 + run.pins.length * 0.3;
 }
 
 function bossOnScreen(run, kind) {
@@ -80,7 +81,7 @@ export function stageShot(name, seed) {
         if (r.wave !== 10 || !bossOnScreen(r, 'matriarch')) return -1;
         const boss = r.enemies.find((e) => e.kind === 'matriarch');
         const p = r.player;
-        if (boss.flash > 0.5 || r.fx.flash > 0.02 || r.fx.floaters.length > 3) return -1;
+        if (boss.flash > 0.5 || r.fx.flash > 0.02 || r.fx.floaters.length > 7) return -1;
         if (p.x < 120 || p.x > 1160 || p.y < 190 || p.y > 660 || p.invuln > 0) return -1;
         const apart = Math.hypot(p.x - boss.x, p.y - boss.y);
         const offCentre = Math.hypot(boss.x - 640, boss.y - 380);

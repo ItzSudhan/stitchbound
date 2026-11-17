@@ -18,7 +18,7 @@ function pickFocus(run) {
   const live = run.enemies.filter((e) => !e.dead && e.kind !== 'wyrmSegment' && e.x > 0 && e.y > 0 && e.x < VIEW.width && e.y < VIEW.height);
   if (live.length === 0) return null;
   const boss = live.find((e) => e.kind === 'matriarch' && !e.entering);
-  if (boss) return { x: boss.x, y: boss.y, radius: boss.r + 125 };
+  if (boss) return { x: boss.x, y: boss.y, radius: boss.r + 100 };
   const eaters = live.filter((e) => e.state === 'eat');
   const pool = eaters.length > 0 ? eaters : live;
   const p = run.player;

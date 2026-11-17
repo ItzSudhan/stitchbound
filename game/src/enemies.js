@@ -166,8 +166,8 @@ function updateGuardMoth(run, enemy, dt) {
     return;
   }
   enemy.orbit += dt * 1.3;
-  const tx = boss.x + Math.cos(enemy.orbit) * 150;
-  const ty = boss.y + Math.sin(enemy.orbit) * 115;
+  const tx = boss.x + Math.cos(enemy.orbit) * 132;
+  const ty = boss.y + Math.sin(enemy.orbit) * 100;
   enemy.x += (tx - enemy.x) * Math.min(1, dt * 4);
   enemy.y += (ty - enemy.y) * Math.min(1, dt * 4);
   enemy.angle = enemy.orbit + Math.PI / 2;

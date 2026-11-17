@@ -31,7 +31,7 @@ export const PLAYER_BASE = {
   pinCount: 1,
   pierce: 0,
   bounce: 0,
-  threadLength: 980,
+  threadLength: 1120,
   loopDamage: 90,
   mendAmount: 0.55,
   dashSpeed: 980,

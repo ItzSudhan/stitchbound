@@ -99,7 +99,7 @@ export function cinchLoop(run, polygon) {
   run.stats.loops += 1;
   run.stats.mended += mended;
   run.stats.biggestLoop = Math.max(run.stats.biggestLoop, caught);
-  run.cinches.push({ polygon, centre, age: 0, life: 0.38 });
+  run.cinches.push({ polygon, centre, caught, age: 0, life: 0.38 });
   for (let i = 0; i < polygon.length; i += 3) {
     burst(fx, polygon[i].x, polygon[i].y, { count: 1, colors: [PALETTE.gold, PALETTE.threadLight], speed: 60, size: 6, kind: 'spark', life: 0.5 });
   }
