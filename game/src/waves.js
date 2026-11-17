@@ -4,7 +4,7 @@ import { DAWN_MEND, PALETTE, WAVE_COUNT } from './config.js';
 import { floatText } from './effects.js';
 import { spawnAtEdge } from './enemies.js';
 import { spawnMatriarch, spawnWyrm } from './bosses.js';
-import { darnAtDawn, quiltIntegrity } from './quilt.js';
+import { darnAtDawn, heirloomsKept, quiltIntegrity } from './quilt.js';
 import { addBonus } from './scoring.js';
 
 export const WAVES = [
@@ -63,6 +63,8 @@ export function updateWaves(run, dt) {
     run.clearTimer = CLEAR_SECONDS;
     const bonus = Math.round(300 * run.wave + 700 * quiltIntegrity(run.quilt));
     addBonus(run, bonus, `NIGHT ${run.wave} CLEARED`, 640, 330);
+    const kept = heirloomsKept(run.quilt);
+    if (kept > 0) addBonus(run, kept * 150, `HEIRLOOMS x${kept}`, 640, 380);
     run.events.push({ type: 'waveClear' });
     if (run.wave >= WAVE_COUNT) run.outcome = 'win';
     else {

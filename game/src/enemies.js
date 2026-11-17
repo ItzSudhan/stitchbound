@@ -151,7 +151,8 @@ function pickPatch(run, enemy) {
   let bestScore = Infinity;
   for (let i = 0; i < 6; i += 1) {
     const patch = run.rng.pick(patches);
-    const score = distance(enemy.x, enemy.y, patch.cx, patch.cy) * run.rng.range(0.6, 1.2);
+    const craving = patch.heirloom ? 0.45 : 1;
+    const score = distance(enemy.x, enemy.y, patch.cx, patch.cy) * run.rng.range(0.6, 1.2) * craving;
     if (score < bestScore) {
       best = patch;
       bestScore = score;

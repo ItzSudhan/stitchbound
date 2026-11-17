@@ -231,13 +231,15 @@ export function drawResults(ctx, summary, time) {
     ['Biggest loop', `${summary.biggestLoop} caught`],
     ['Cloth darned', `${summary.mended.toFixed(1)} patches`],
     ['Top combo', `x${summary.combo}`],
+    ['Heirlooms kept', `${summary.heirlooms} / 8`],
     ['Time', formatTime(summary.time)],
+    ['Notions sewn', String(summary.owned.length)],
   ];
   stats.forEach(([label, value], i) => {
     const col = i % 2;
     const row = Math.floor(i / 2);
     const x = px + 60 + col * 370;
-    const y = py + 168 + row * 44;
+    const y = py + 162 + row * 40;
     drawText(ctx, label, x, y, { size: 24, color: PALETTE.ink, align: 'left', outline: 0, weight: 'normal' });
     drawText(ctx, value, x + 320, y, { size: 26, color: PALETTE.navy, align: 'right', outline: 0 });
   });

@@ -6,6 +6,12 @@ import { createRandom } from './random.js';
 import { PALETTE, PATCH, PATCH_COLORS, QUILT_BUDGET, VIEW } from './config.js';
 
 const PATTERNS = ['plain', 'gingham', 'dots', 'stripes', 'flowers', 'chevron', 'cross', 'plain'];
+const HEIRLOOMS = 8;
+
+/** Heirloom patches still holding together (most of their cloth left). */
+export function heirloomsKept(quilt) {
+  return quilt.patches.filter((p) => p.heirloom && p.hp > 0.5).length;
+}
 
 export function createQuilt(seed) {
   const rng = createRandom(seed * 7919 + 13);
@@ -33,8 +39,17 @@ export function createQuilt(seed) {
         holes,
         mendFlash: 0,
         biteFlash: 0,
+        heirloom: false,
       });
     }
+  }
+  // Heirloom patches: gold-embroidered squares the moths crave, worth a bonus each dawn they survive.
+  const inner = patches.filter((p) => p.col > 0 && p.row > 1 && p.col < PATCH.cols - 1 && p.row < PATCH.rows - 2);
+  for (let i = 0; i < HEIRLOOMS; i += 1) {
+    if (inner.length === 0) break;
+    const pick = inner.splice(Math.floor(rng.next() * inner.length), 1)[0];
+    pick.heirloom = true;
+    inner.splice(0, inner.length, ...inner.filter((p) => Math.abs(p.col - pick.col) + Math.abs(p.row - pick.row) > 1));
   }
   // Painted at twice the logical size so the cloth stays crisp when the page scales the game up.
   const canvas = document.createElement('canvas');
@@ -204,6 +219,7 @@ function paintPatch(ctx, patch, rng) {
     ctx.fillRect(x + rng.range(0, s), y + rng.range(0, s), 2, 2);
   }
   ctx.globalAlpha = 1;
+  if (patch.heirloom) paintHeirloom(ctx, patch);
   // Raised seam shading and the running stitch just inside each edge.
   ctx.fillStyle = 'rgba(255,255,255,0.18)';
   ctx.fillRect(x, y, s, 3);
@@ -217,6 +233,41 @@ function paintPatch(ctx, patch, rng) {
   ctx.strokeRect(x + 7, y + 7, s - 14, s - 14);
   ctx.setLineDash([]);
   ctx.restore();
+}
+
+/** A deep velvet square with a gold-thread star embroidered in its middle. */
+function paintHeirloom(ctx, patch) {
+  const s = PATCH.size;
+  const cx = patch.x + s / 2;
+  const cy = patch.y + s / 2;
+  ctx.fillStyle = '#5b2a4e';
+  ctx.fillRect(patch.x, patch.y, s, s);
+  ctx.strokeStyle = PALETTE.gold;
+  ctx.lineWidth = 3;
+  ctx.setLineDash([5, 3]);
+  ctx.strokeRect(patch.x + 4, patch.y + 4, s - 8, s - 8);
+  ctx.setLineDash([]);
+  ctx.beginPath();
+  for (let i = 0; i < 10; i += 1) {
+    const a = (i / 10) * TAU - Math.PI / 2;
+    const r = i % 2 === 0 ? 24 : 10;
+    ctx.lineTo(cx + Math.cos(a) * r, cy + Math.sin(a) * r);
+  }
+  ctx.closePath();
+  ctx.fillStyle = PALETTE.gold;
+  ctx.fill();
+  ctx.strokeStyle = PALETTE.goldDeep;
+  ctx.lineWidth = 2;
+  ctx.stroke();
+  ctx.strokeStyle = 'rgba(255,240,200,0.8)';
+  ctx.lineWidth = 1.2;
+  for (let i = 0; i < 5; i += 1) {
+    const a = (i / 5) * TAU - Math.PI / 2;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.lineTo(cx + Math.cos(a) * 20, cy + Math.sin(a) * 20);
+    ctx.stroke();
+  }
 }
 
 function paintQuiltShade(ctx) {

@@ -2,7 +2,7 @@
 // quilt's integrity, the dash and thread meters, the boss bar, owned notions and the night banner.
 import { PALETTE, WAVE_COUNT, VIEW } from './config.js';
 import { easeOutBack } from './geometry.js';
-import { quiltIntegrity } from './quilt.js';
+import { heirloomsKept, quiltIntegrity } from './quilt.js';
 import { comboMultiplier } from './scoring.js';
 import { foesRemaining, WAVES } from './waves.js';
 import { upgradeById } from './upgrades.js';
@@ -26,6 +26,7 @@ function drawTip(ctx, run, time) {
   let tip = null;
   if (run.wave === 1 && run.stats.loops === 0 && run.time > 2.5) tip = 'Circle the moths: cross your own thread to close a loop!';
   else if (run.wave === 2 && run.waveTime < 6) tip = 'Loops also darn holes shut. Space to snip-dash.';
+  else if (run.wave === 3 && run.waveTime < 6) tip = 'Moths crave gold-star heirlooms: each one kept pays at dawn.';
   else if (run.wave === 6 && run.waveTime < 6) tip = 'Snippers cut your thread: pin them first!';
   if (!tip) return;
   const y = VIEW.height - 118 + Math.sin(time * 3) * 3;
@@ -86,7 +87,9 @@ function drawQuiltMeter(ctx, run, time) {
   const integrity = quiltIntegrity(run.quilt);
   const low = integrity < 0.35;
   const y = VIEW.height - 74;
-  drawFeltPanel(ctx, 14, y, 360, 60, PALETTE.cream, 'rgba(42,29,26,0.4)', 14);
+  drawFeltPanel(ctx, 14, y, 440, 60, PALETTE.cream, 'rgba(42,29,26,0.4)', 14);
+  drawStar(ctx, 384, y + 30, 15);
+  drawText(ctx, String(heirloomsKept(run.quilt)), 406, y + 31, { size: 26, color: PALETTE.goldDeep, align: 'left', outline: 0 });
   const pulse = low ? 0.5 + 0.5 * Math.sin(time * 10) : 1;
   drawText(ctx, 'QUILT', 34, y + 30, { size: 24, color: low ? PALETTE.danger : PALETTE.ink, align: 'left', outline: 0 });
   const color = integrity > 0.6 ? PALETTE.sage : integrity > 0.35 ? PALETTE.mustard : PALETTE.danger;
@@ -94,6 +97,22 @@ function drawQuiltMeter(ctx, run, time) {
   drawMeter(ctx, 116, y + 19, 148, 22, integrity, color);
   ctx.globalAlpha = 1;
   drawText(ctx, `${Math.round(integrity * 100)}%`, 344, y + 31, { size: 26, color: PALETTE.ink, align: 'right', outline: 0 });
+}
+
+/** The gold heirloom star, as embroidered on the heirloom patches. */
+function drawStar(ctx, x, y, r) {
+  ctx.beginPath();
+  for (let i = 0; i < 10; i += 1) {
+    const a = (i / 10) * Math.PI * 2 - Math.PI / 2;
+    const rr = i % 2 === 0 ? r : r * 0.42;
+    ctx.lineTo(x + Math.cos(a) * rr, y + Math.sin(a) * rr);
+  }
+  ctx.closePath();
+  ctx.fillStyle = PALETTE.gold;
+  ctx.fill();
+  ctx.strokeStyle = PALETTE.ink;
+  ctx.lineWidth = 2;
+  ctx.stroke();
 }
 
 function drawNeedleMeters(ctx, run) {

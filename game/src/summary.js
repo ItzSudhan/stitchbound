@@ -1,4 +1,5 @@
 // The numbers of a finished run, as the results card shows them.
+import { heirloomsKept } from './quilt.js';
 
 export function summarizeRun(run, previousBest) {
   return {
@@ -12,6 +13,7 @@ export function summarizeRun(run, previousBest) {
     biggestLoop: run.stats.biggestLoop,
     mended: run.stats.mended,
     combo: run.combo.best,
+    heirlooms: heirloomsKept(run.quilt),
     time: run.time,
     owned: Object.keys(run.owned),
   };
