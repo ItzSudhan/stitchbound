@@ -26,8 +26,6 @@ const shotName = params.get('shot');
 
 const canvas = document.getElementById('game');
 const status = document.getElementById('status');
-canvas.width = VIEW.width;
-canvas.height = VIEW.height;
 const ctx = canvas.getContext('2d');
 const input = createInput(canvas);
 const audio = createAudio();
@@ -50,10 +48,26 @@ function newSeed() {
   return fixedSeed ?? Math.floor(Math.random() * 4294967296);
 }
 
+/** Backing-store pixels per logical pixel, so the game stays sharp on large and HiDPI screens. */
+let pixelScale = 1;
+
 function fitCanvas() {
   const scale = Math.min(window.innerWidth / VIEW.width, window.innerHeight / VIEW.height);
-  canvas.style.width = `${Math.floor(VIEW.width * scale)}px`;
-  canvas.style.height = `${Math.floor(VIEW.height * scale)}px`;
+  const cssWidth = Math.floor(VIEW.width * scale);
+  const cssHeight = Math.floor(VIEW.height * scale);
+  canvas.style.width = `${cssWidth}px`;
+  canvas.style.height = `${cssHeight}px`;
+  pixelScale = shotName ? 1 : Math.min(2, Math.max(1, (cssWidth / VIEW.width) * (window.devicePixelRatio || 1)));
+  canvas.width = Math.round(VIEW.width * pixelScale);
+  canvas.height = Math.round(VIEW.height * pixelScale);
+}
+
+/** Pauses a run when the player switches away, so nothing happens behind their back. */
+function pauseOnBlur() {
+  if (state.screen === 'play') {
+    state.screen = 'pause';
+    announce('Paused.');
+  }
 }
 
 function announce(text) {
@@ -204,6 +218,7 @@ function update(dt) {
 
 function render() {
   const t = state.clock;
+  ctx.setTransform(pixelScale, 0, 0, pixelScale, 0, 0);
   if (state.screen === 'title') {
     drawScene(ctx, state.demoRun, t);
     drawTitle(ctx, state.best, t);
@@ -252,6 +267,10 @@ function stage(name) {
 
 fitCanvas();
 window.addEventListener('resize', fitCanvas);
+window.addEventListener('blur', pauseOnBlur);
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) pauseOnBlur();
+});
 window.__stitch = {
   state,
   startRun,

@@ -85,7 +85,9 @@ export function stageShot(name, seed) {
         if (p.x < 120 || p.x > 1160 || p.y < 190 || p.y > 660 || p.invuln > 0) return -1;
         const apart = Math.hypot(p.x - boss.x, p.y - boss.y);
         const offCentre = Math.hypot(boss.x - 640, boss.y - 380);
-        return spectacle(r) - offCentre * 0.12 + (boss.spiralLeft > 0 ? 40 : 0) + (boss.hp / boss.maxHp) * 60 + (p.hp >= 3 ? 20 : 0) + (apart > 180 && apart < 420 ? 30 : 0);
+        const spacing = apart < 190 ? -120 : apart < 430 ? 30 : 0;
+        const spools = p.hp <= 1 ? -60 : p.hp >= 3 ? 25 : 0;
+        return spectacle(r) - offCentre * 0.12 + (boss.spiralLeft > 0 ? 40 : 0) + (boss.hp / boss.maxHp) * 60 + spools + spacing;
       });
       return { screen: 'play', run, time: run.time };
     }

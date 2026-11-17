@@ -17,7 +17,22 @@ export function drawHud(ctx, run, best, time) {
   drawNeedleMeters(ctx, run);
   drawBossBar(ctx, run);
   drawOwnedNotions(ctx, run);
+  drawTip(ctx, run, time);
   drawBanner(ctx, run);
+}
+
+/** Teaching tips on the first nights: shown until the player has done the thing they teach. */
+function drawTip(ctx, run, time) {
+  let tip = null;
+  if (run.wave === 1 && run.stats.loops === 0 && run.time > 2.5) tip = 'Circle the moths: cross your own thread to close a loop!';
+  else if (run.wave === 2 && run.waveTime < 6) tip = 'Loops also darn holes shut. Space to snip-dash.';
+  else if (run.wave === 6 && run.waveTime < 6) tip = 'Snippers cut your thread: pin them first!';
+  if (!tip) return;
+  const y = VIEW.height - 118 + Math.sin(time * 3) * 3;
+  ctx.font = `bold 24px ${'"Trebuchet MS", sans-serif'}`;
+  const w = ctx.measureText(tip).width + 50;
+  drawFeltPanel(ctx, VIEW.width / 2 - w / 2, y - 26, w, 52, PALETTE.gold, 'rgba(42,29,26,0.5)', 14);
+  drawText(ctx, tip, VIEW.width / 2, y + 1, { size: 24, color: PALETTE.ink, outline: 0 });
 }
 
 function drawHealth(ctx, run) {
@@ -76,7 +91,7 @@ function drawQuiltMeter(ctx, run, time) {
   drawText(ctx, 'QUILT', 34, y + 30, { size: 24, color: low ? PALETTE.danger : PALETTE.ink, align: 'left', outline: 0 });
   const color = integrity > 0.6 ? PALETTE.sage : integrity > 0.35 ? PALETTE.mustard : PALETTE.danger;
   ctx.globalAlpha = low ? 0.6 + 0.4 * pulse : 1;
-  drawMeter(ctx, 120, y + 19, 160, 22, integrity, color);
+  drawMeter(ctx, 116, y + 19, 148, 22, integrity, color);
   ctx.globalAlpha = 1;
   drawText(ctx, `${Math.round(integrity * 100)}%`, 344, y + 31, { size: 26, color: PALETTE.ink, align: 'right', outline: 0 });
 }

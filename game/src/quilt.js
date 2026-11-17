@@ -36,10 +36,12 @@ export function createQuilt(seed) {
       });
     }
   }
+  // Painted at twice the logical size so the cloth stays crisp when the page scales the game up.
   const canvas = document.createElement('canvas');
-  canvas.width = VIEW.width;
-  canvas.height = VIEW.height;
+  canvas.width = VIEW.width * 2;
+  canvas.height = VIEW.height * 2;
   const ctx = canvas.getContext('2d');
+  ctx.scale(2, 2);
   for (const patch of patches) paintPatch(ctx, patch, rng);
   paintQuiltShade(ctx);
   return { patches, canvas, eaten: 0 };
@@ -103,7 +105,7 @@ export function updateQuilt(quilt, dt) {
 }
 
 export function drawQuilt(ctx, quilt) {
-  ctx.drawImage(quilt.canvas, 0, 0);
+  ctx.drawImage(quilt.canvas, 0, 0, VIEW.width, VIEW.height);
   for (const patch of quilt.patches) {
     if (patch.hp < 1) drawPatchDamage(ctx, patch);
     if (patch.mendFlash > 0) drawMendStitches(ctx, patch);

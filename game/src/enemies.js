@@ -16,14 +16,14 @@ import { VIEW } from './config.js';
 import { angleDelta, clamp, distance } from './geometry.js';
 
 export const ENEMY_KINDS = {
-  moth: { hp: 18, r: 17, speed: 92, score: 100, colors: ['#9c7bb0', '#5e4170', '#e8d9b5'] },
+  moth: { hp: 18, r: 19, speed: 92, score: 100, colors: ['#9c7bb0', '#5e4170', '#e8d9b5'] },
   silverfish: { hp: 9, r: 11, speed: 185, score: 60, colors: ['#d9dde3', '#8a919c'] },
   beetle: { hp: 48, r: 21, speed: 72, score: 220, colors: ['#2b4166', '#6f8fb3', '#f6ecd6'] },
   snipper: { hp: 30, r: 16, speed: 150, score: 180, colors: ['#7a3b2e', '#d9dde3'] },
   spitter: { hp: 60, r: 23, speed: 42, score: 260, colors: ['#d6333f', '#94b283', '#f6ecd6'] },
   wyrm: { hp: 420, r: 27, speed: 150, score: 2000, colors: ['#e07a5f', '#f4a7a1', '#f6ecd6'] },
   wyrmSegment: { hp: 70, r: 21, speed: 0, score: 120, colors: ['#e07a5f', '#f2cc8f'] },
-  matriarch: { hp: 3400, r: 72, speed: 70, score: 10000, colors: ['#5e4170', '#9c7bb0', '#f5c542', '#f6ecd6'] },
+  matriarch: { hp: 4200, r: 72, speed: 70, score: 10000, colors: ['#5e4170', '#9c7bb0', '#f5c542', '#f6ecd6'] },
 };
 
 const BEHAVIOURS = {

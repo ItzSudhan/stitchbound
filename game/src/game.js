@@ -79,7 +79,20 @@ export function stepRun(run, intent, dt) {
   if (!run.outcome) {
     if (run.player.hp <= 0) loseRun(run, 'needle');
     else if (quiltIntegrity(run.quilt) <= 0) loseRun(run, 'quilt');
+  } else if (run.outcome === 'win' && !run.celebrated) celebrate(run);
+}
+
+/** Dawn on a saved quilt: felt confetti bursts all over the field. */
+function celebrate(run) {
+  run.celebrated = true;
+  const colors = [PALETTE.gold, PALETTE.thread, PALETTE.teal, PALETTE.rose, PALETTE.sky, PALETTE.cream];
+  for (let i = 0; i < 9; i += 1) {
+    const x = 140 + (i % 3) * 500 + run.rng.range(-60, 60);
+    const y = 160 + Math.floor(i / 3) * 240 + run.rng.range(-40, 40);
+    burst(run.fx, x, y, { count: 30, colors, speed: 420, size: 7, life: 2.2, gravity: 160 });
+    ring(run.fx, x, y, PALETTE.gold, 140, 0.9, 8);
   }
+  screenFlash(run.fx, PALETTE.gold, 0.5);
 }
 
 /** A closed loop pulls tight: everything inside takes the cinch, holes inside are darned shut. */
@@ -91,7 +104,7 @@ export function cinchLoop(run, polygon) {
   for (const enemy of run.enemies) {
     if (enemy.dead || !pointInPolygon(enemy.x, enemy.y, polygon)) continue;
     caught += 1;
-    const damage = run.mods.loopDamage * (enemy.kind === 'matriarch' ? 2.2 : 1);
+    const damage = run.mods.loopDamage * (enemy.kind === 'matriarch' ? 1.4 : 1);
     damageEnemy(run, enemy, damage, 'loop');
     burst(fx, enemy.x, enemy.y, { count: 8, colors: [PALETTE.thread, PALETTE.gold], speed: 180, size: 6, kind: 'spark' });
   }

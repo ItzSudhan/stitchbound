@@ -98,8 +98,8 @@ try {
     run.immortal = true;
     window.__stitch.pilotOn = true;
   })()`);
-  await fastForward(20);
-  check('the Matriarch arrives on night 10', (await S('s.run.enemies.some(e => e.kind === "matriarch")')) === true);
+  await fastForward(8);
+  check('the Matriarch arrives on night 10', (await S('s.run.enemies.some(e => e.kind === "matriarch")')) === true, await S('`${s.screen} night ${s.run.wave} t ${s.run.waveTime.toFixed(1)} ${s.run.outcome}`'));
   await fastForward(240);
   await chrome.waitFor('window.__stitch.state.screen === "over"', 60000);
   check('beating the Matriarch wins', (await S('s.summary.outcome')) === 'win', await S('s.summary.outcome'));
