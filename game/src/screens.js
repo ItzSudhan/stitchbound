@@ -2,7 +2,7 @@
 // and the results card that ends every run, win or lose, with its numbers and a restart.
 import { FONT, PALETTE, VIEW, WAVE_COUNT } from './config.js';
 import { easeOutBack } from './geometry.js';
-import { drawUpgradeIcon } from './sprites.js';
+import { drawBeetle, drawMatriarch, drawMoth, drawSilverfish, drawSnipper, drawSpitter, drawUpgradeIcon, drawYarnBall } from './sprites.js';
 import { drawFeltPanel, drawText, formatNumber, formatTime } from './ui.js';
 import { upgradeById } from './upgrades.js';
 
@@ -16,7 +16,7 @@ function drawLogo(ctx, x, y, size, time) {
   drawText(ctx, 'STITCHBOUND', x, y + bob, { size, color: PALETTE.cream, font: FONT.display, outline: size / 7, stitch: PALETTE.thread });
   // A needle threads through the title, its red thread looping under the letters.
   ctx.save();
-  ctx.translate(x + size * 3.55, y - size * 0.35 + bob);
+  ctx.translate(x + size * 4.35, y - size * 0.2 + bob);
   ctx.rotate(-0.5);
   ctx.beginPath();
   ctx.moveTo(46, 0);
@@ -34,8 +34,8 @@ function drawLogo(ctx, x, y, size, time) {
   ctx.lineCap = 'round';
   const thread = () => {
     ctx.beginPath();
-    ctx.moveTo(x + size * 3.2, y - size * 0.15 + bob);
-    ctx.bezierCurveTo(x + size * 3.6, y + size * 0.9, x - size * 1.5, y + size * 1.1, x - size * 3.4, y + size * 0.55 + bob);
+    ctx.moveTo(x + size * 4.0, y + bob);
+    ctx.bezierCurveTo(x + size * 4.2, y + size * 0.9, x - size * 1.5, y + size * 1.0, x - size * 3.6, y + size * 0.5 + bob);
   };
   thread();
   ctx.stroke();
@@ -47,43 +47,79 @@ function drawLogo(ctx, x, y, size, time) {
 
 export function drawTitle(ctx, best, time) {
   dim(ctx, 0.35);
-  drawLogo(ctx, VIEW.width / 2, 140, 112, time);
-  drawText(ctx, 'Ten nights of moths. One needle. Mend the heirloom quilt.', VIEW.width / 2, 262, { size: 28, color: PALETTE.gold, outline: 6 });
+  drawLogo(ctx, VIEW.width / 2 - 30, 118, 108, time);
+  drawText(ctx, 'Ten nights of moths. One needle. Mend the heirloom quilt.', VIEW.width / 2, 232, { size: 28, color: PALETTE.gold, outline: 6 });
 
-  const px = 170;
-  const py = 300;
-  drawFeltPanel(ctx, px, py, 940, 330, PALETTE.cream, 'rgba(42,29,26,0.45)', 22);
-  drawText(ctx, 'HOW TO PLAY', px + 235, py + 42, { size: 28, color: PALETTE.thread, outline: 0 });
-  drawText(ctx, 'THE RULES', px + 700, py + 42, { size: 28, color: PALETTE.thread, outline: 0 });
+  const px = 120;
+  const py = 268;
+  drawFeltPanel(ctx, px, py, 1040, 334, PALETTE.cream, 'rgba(42,29,26,0.45)', 22);
+  drawText(ctx, 'HOW TO PLAY', px + 190, py + 40, { size: 26, color: PALETTE.thread, outline: 0 });
+  drawText(ctx, 'THE PESTS', px + 700, py + 40, { size: 26, color: PALETTE.thread, outline: 0 });
   const controls = [
     ['WASD', 'move the needle'],
     ['MOUSE', 'aim'],
     ['CLICK', 'hold to fire pins'],
-    ['SPACE', 'snip-dash (dodge)'],
+    ['SPACE', 'snip-dash'],
     ['P / M', 'pause / mute'],
   ];
   controls.forEach(([key, what], i) => {
-    const y = py + 92 + i * 46;
-    drawKeyCap(ctx, px + 40, y - 18, key);
-    drawText(ctx, what, px + 172, y, { size: 24, color: PALETTE.ink, align: 'left', outline: 0, weight: 'bold' });
+    const y = py + 88 + i * 48;
+    drawKeyCap(ctx, px + 34, y - 19, key);
+    drawText(ctx, what, px + 162, y, { size: 23, color: PALETTE.ink, align: 'left', outline: 0, weight: 'bold' });
   });
-  const rules = [
-    'Your needle trails red thread.',
-    'Cross your own thread to close a',
-    'loop: it CINCHES every pest inside',
-    'and DARNS the holes shut.',
-    'Moths eat the quilt. At 0% it unravels.',
-    'Survive 10 nights. Beat the Matriarch.',
-  ];
-  rules.forEach((line, i) => {
-    drawText(ctx, line, px + 480, py + 92 + i * 38, { size: 23, color: PALETTE.ink, align: 'left', outline: 0, weight: i === 2 || i === 3 ? 'bold' : 'normal' });
-  });
+  ctx.strokeStyle = 'rgba(42,29,26,0.3)';
+  ctx.lineWidth = 2;
+  ctx.setLineDash([8, 6]);
+  ctx.beginPath();
+  ctx.moveTo(px + 375, py + 26);
+  ctx.lineTo(px + 375, py + 310);
+  ctx.stroke();
+  ctx.setLineDash([]);
+  drawBestiary(ctx, px + 400, py + 98, time);
 
-  const pulse = 0.75 + 0.25 * Math.sin(time * 5);
+  drawFeltPanel(ctx, 150, 622, 980, 56, PALETTE.thread, 'rgba(246,236,214,0.7)', 14);
+  drawText(ctx, 'Cross your own thread to close a loop: it CINCHES pests and DARNS holes', VIEW.width / 2, 651, { size: 25, color: PALETTE.cream, outline: 4 });
+
+  const pulse = 0.85 + 0.15 * Math.sin(time * 5);
   ctx.globalAlpha = pulse;
-  drawText(ctx, 'CLICK or press ENTER to begin', VIEW.width / 2, 682, { size: 40, color: PALETTE.cream, outline: 8 });
+  drawText(ctx, 'CLICK or press ENTER to begin', VIEW.width / 2, 718, { size: 38, color: PALETTE.cream, outline: 8 });
   ctx.globalAlpha = 1;
-  drawText(ctx, `BEST SCORE  ${formatNumber(best)}`, VIEW.width / 2, 742, { size: 26, color: PALETTE.gold, outline: 6 });
+  drawText(ctx, `BEST SCORE  ${formatNumber(best)}`, VIEW.width / 2, 768, { size: 24, color: PALETTE.gold, outline: 6 });
+}
+
+/** A field guide to every creature: its felt portrait, its name and what it does. */
+const BESTIARY = [
+  ['Moth', 'eats the quilt', (ctx, t) => drawMoth(ctx, critter({ r: 19, angle: -Math.PI / 2 }), t)],
+  ['Silverfish', 'fast, comes in schools', (ctx, t) => drawSilverfish(ctx, critter({ r: 15, angle: -0.5 }), t)],
+  ['Button Beetle', 'winds up, charges', (ctx, t) => drawBeetle(ctx, critter({ r: 21, angle: -Math.PI / 2 }), t)],
+  ['Snipper', 'cuts your thread', (ctx, t) => drawSnipper(ctx, critter({ r: 16, angle: -0.6 }), t)],
+  ['Pincushion', 'fires fans of pins', (ctx, t) => drawSpitter(ctx, critter({ r: 22 }), t)],
+  ['Yarn Wyrm', 'boss of night 5', (ctx, t) => {
+    for (let i = 3; i >= 1; i -= 1) drawYarnBall(ctx, critter({ x: -i * 20, y: Math.sin(i + t * 3) * 6, r: 15, index: i, radiusScale: 1 - i * 0.08 }), t, false);
+    drawYarnBall(ctx, critter({ x: 8, r: 19, angle: 0 }), t, true);
+  }],
+  ['Moth Matriarch', 'boss of night 10', (ctx, t) => drawMatriarch(ctx, critter({ r: 24, angle: 0 }), t)],
+];
+
+function critter(fields) {
+  return { x: 0, y: 0, angle: 0, seed: 1, state: 'move', flash: 0, index: 0, ...fields };
+}
+
+function drawBestiary(ctx, x, y, time) {
+  BESTIARY.forEach(([name, role, draw], i) => {
+    const row = i < 4 ? 0 : 1;
+    const col = row === 0 ? i : i - 4;
+    const cx = x + (row === 0 ? 75 + col * 152 : 150 + col * 152);
+    const cy = y + row * 128;
+    ctx.save();
+    ctx.translate(cx, cy);
+    const zoom = [1.45, 1.6, 1.25, 1.6, 1.2, 1.2, 1.1][i];
+    ctx.scale(zoom, zoom);
+    draw(ctx, time);
+    ctx.restore();
+    drawText(ctx, name, cx, cy + 50, { size: 19, color: PALETTE.ink, outline: 0 });
+    drawText(ctx, role, cx, cy + 71, { size: 16, color: PALETTE.terracotta, outline: 0, weight: 'normal' });
+  });
 }
 
 function drawKeyCap(ctx, x, y, label) {
