@@ -2,7 +2,8 @@
 // mouse, spools of health with mercy frames, and orbiting guard buttons.
 import { VIEW } from './config.js';
 import { angleDelta, clamp, TAU } from './geometry.js';
-import { firePins } from './projectiles.js';
+import { firePinAt, firePins } from './projectiles.js';
+import { damageEnemy } from './enemies.js';
 import { addShake, burst, screenFlash } from './effects.js';
 
 export function createPlayer(mods) {
@@ -50,6 +51,7 @@ export function updatePlayer(run, intent, dt) {
     p.dashY = dirLen > 0 ? my / dirLen : Math.sin(p.angle);
     p.dashTimer = mods.dashTime;
     p.dashReady = mods.dashCooldown;
+    p.ripped = new Set();
     p.invuln = Math.max(p.invuln, mods.dashTime + 0.08);
     run.events.push({ type: 'dash' });
     burst(run.fx, p.x, p.y, { count: 10, colors: ['#ffffff', '#d9dde3'], speed: 200, size: 4, life: 0.35 });
@@ -59,6 +61,7 @@ export function updatePlayer(run, intent, dt) {
     p.dashTimer -= dt;
     p.vx = p.dashX * mods.dashSpeed;
     p.vy = p.dashY * mods.dashSpeed;
+    if (mods.dashDamage > 0) ripThrough(run, p);
   } else {
     const blend = 1 - Math.exp(-mods.accel * dt);
     p.vx += (mx * mods.speed - p.vx) * blend;
@@ -77,6 +80,17 @@ export function updatePlayer(run, intent, dt) {
     p.fireTimer = mods.fireDelay;
     p.recoil = 1;
     firePins(run, p.x, p.y, p.aim);
+  }
+}
+
+/** Seam Ripper: each pest the dashing needle passes through is cut once per dash. */
+function ripThrough(run, p) {
+  for (const enemy of run.enemies) {
+    if (enemy.dead || p.ripped.has(enemy.id)) continue;
+    if (Math.hypot(enemy.x - p.x, enemy.y - p.y) > enemy.r + 22) continue;
+    p.ripped.add(enemy.id);
+    damageEnemy(run, enemy, run.mods.dashDamage, 'rip', p.vx, p.vy);
+    burst(run.fx, enemy.x, enemy.y, { count: 8, colors: ['#ffffff', '#b5c99a'], speed: 220, size: 4, kind: 'fiber' });
   }
 }
 
@@ -104,5 +118,7 @@ export function hurtPlayer(run, amount = 1) {
   addShake(run.fx, 14);
   screenFlash(run.fx, '#e0473a', 0.55);
   burst(run.fx, p.x, p.y, { count: 16, colors: ['#d6333f', '#ff8a8a', '#ffffff'], speed: 260, size: 5, kind: 'fiber' });
+  // Pincushion Heart: the hurt needle bristles, firing pins all around it.
+  for (let i = 0; i < run.mods.hurtPins; i += 1) firePinAt(run, p.x, p.y, (i / run.mods.hurtPins) * TAU);
   return true;
 }

@@ -17,6 +17,8 @@ export const UPGRADES = [
   { id: 'buttons', name: 'Button Guard', text: 'A button orbits you and blocks shots', max: 3, color: '#2b4166', apply: (m) => { m.buttons += 1; } },
   { id: 'snip', name: 'Quick Snip', text: 'Dash recharges 30% faster', max: 2, color: '#94b283', apply: (m) => { m.dashCooldown *= 0.7; } },
   { id: 'golden', name: 'Golden Eye', text: '+15% chance of a triple-damage pin', max: 3, color: '#f5c542', apply: (m) => { m.critChance += 0.15; } },
+  { id: 'ripper', name: 'Seam Ripper', text: 'Your snip-dash cuts through pests', max: 2, color: '#b5c99a', apply: (m) => { m.dashDamage += 45; } },
+  { id: 'heart', name: 'Pincushion Heart', text: 'When hit, burst a ring of 12 pins', max: 2, color: '#ef9a92', apply: (m) => { m.hurtPins += 12; } },
 ];
 
 const BY_ID = new Map(UPGRADES.map((u) => [u.id, u]));

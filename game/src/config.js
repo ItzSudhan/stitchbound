@@ -41,6 +41,8 @@ export const PLAYER_BASE = {
   critChance: 0,
   barbed: 0,
   buttons: 0,
+  dashDamage: 0,
+  hurtPins: 0,
 };
 
 /** Combo: kills within this many seconds of each other raise the score multiplier. */

@@ -105,7 +105,7 @@ export function pilotIntent(run, pilot, dt) {
   return { moveX: mx, moveY: my, aimX, aimY, fire: nearest < 900, dash };
 }
 
-const PILOT_TASTE = ['wax', 'spool', 'twin', 'quick', 'steel', 'mend', 'thimble', 'buttons', 'barbed', 'golden', 'swift', 'pierce', 'ricochet', 'snip'];
+const PILOT_TASTE = ['wax', 'spool', 'twin', 'quick', 'steel', 'mend', 'thimble', 'buttons', 'heart', 'barbed', 'golden', 'swift', 'pierce', 'ricochet', 'ripper', 'snip'];
 
 /** The pilot's notion pick: the first of the offered three in its order of taste. */
 export function pilotPick(choices) {

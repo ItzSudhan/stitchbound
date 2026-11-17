@@ -8,26 +8,29 @@ import { buttonPositions, hurtPlayer } from './player.js';
 
 const PIN_SPREAD = 0.13;
 
+/** A volley: one pin per Twin Pins level, fanned around the aim. */
 export function firePins(run, x, y, angle) {
-  const mods = run.mods;
-  const count = mods.pinCount;
-  for (let i = 0; i < count; i += 1) {
-    const a = angle + (i - (count - 1) / 2) * PIN_SPREAD;
-    const crit = run.rng.chance(mods.critChance);
-    run.pins.push({
-      x: x + Math.cos(a) * 18,
-      y: y + Math.sin(a) * 18,
-      vx: Math.cos(a) * mods.pinSpeed,
-      vy: Math.sin(a) * mods.pinSpeed,
-      damage: mods.pinDamage * (crit ? 3 : 1),
-      crit,
-      pierce: mods.pierce,
-      bounce: mods.bounce,
-      hit: new Set(),
-      life: 1.2,
-    });
-  }
+  const count = run.mods.pinCount;
+  for (let i = 0; i < count; i += 1) firePinAt(run, x, y, angle + (i - (count - 1) / 2) * PIN_SPREAD);
   run.events.push({ type: 'shoot' });
+}
+
+/** One pin from (x, y) along angle a, with the player's damage, crits, pierce and ricochet. */
+export function firePinAt(run, x, y, a) {
+  const mods = run.mods;
+  const crit = run.rng.chance(mods.critChance);
+  run.pins.push({
+    x: x + Math.cos(a) * 18,
+    y: y + Math.sin(a) * 18,
+    vx: Math.cos(a) * mods.pinSpeed,
+    vy: Math.sin(a) * mods.pinSpeed,
+    damage: mods.pinDamage * (crit ? 3 : 1),
+    crit,
+    pierce: mods.pierce,
+    bounce: mods.bounce,
+    hit: new Set(),
+    life: 1.2,
+  });
 }
 
 export function updatePins(run, dt) {

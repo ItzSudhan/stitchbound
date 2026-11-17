@@ -621,6 +621,42 @@ export function drawUpgradeIcon(ctx, upgrade, x, y, size) {
     case 'buttons':
       drawButtonShape(ctx, 0, 0, 20, PALETTE.cream, '#c9ada7');
       break;
+    case 'ripper':
+      // A seam ripper: a handle and a forked blade with a red safety ball.
+      ctx.beginPath();
+      ctx.rect(-26, -6, 22, 12);
+      inked(ctx, '#e3a83b', 3);
+      ctx.lineWidth = 6;
+      ctx.beginPath();
+      ctx.moveTo(-4, 0);
+      ctx.lineTo(12, 0);
+      ctx.lineTo(24, -10);
+      ctx.moveTo(12, 0);
+      ctx.lineTo(24, 8);
+      ctx.stroke();
+      ctx.strokeStyle = '#fff';
+      ctx.lineWidth = 3;
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(24, 8, 5, 0, TAU);
+      inked(ctx, PALETTE.thread, 2);
+      break;
+    case 'heart':
+      ctx.beginPath();
+      ctx.moveTo(0, 20);
+      ctx.bezierCurveTo(-30, 0, -18, -24, 0, -10);
+      ctx.bezierCurveTo(18, -24, 30, 0, 0, 20);
+      inked(ctx, PALETTE.thread, 3);
+      ctx.lineWidth = 3;
+      for (let i = 0; i < 5; i += 1) {
+        const a = -Math.PI / 2 + (i - 2) * 0.6;
+        ctx.strokeStyle = INK;
+        ctx.beginPath();
+        ctx.moveTo(Math.cos(a) * 8, Math.sin(a) * 8 - 2);
+        ctx.lineTo(Math.cos(a) * 26, Math.sin(a) * 26 - 2);
+        ctx.stroke();
+      }
+      break;
     case 'golden':
       ctx.beginPath();
       for (let i = 0; i < 10; i += 1) {
