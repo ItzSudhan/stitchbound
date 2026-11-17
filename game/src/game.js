@@ -166,6 +166,7 @@ function loseRun(run, reason) {
   run.outcome = reason;
   run.events.push({ type: 'lose' });
   addShake(run.fx, 24);
+  hitStop(run.fx, 0.35);
   burst(run.fx, run.player.x, run.player.y, { count: 40, colors: [PALETTE.thread, PALETTE.steel, PALETTE.cream], speed: 320, size: 6, kind: 'fiber' });
 }
 

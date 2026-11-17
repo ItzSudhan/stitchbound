@@ -99,6 +99,29 @@ function drawQuiltMeter(ctx, run, time) {
   drawText(ctx, `${Math.round(integrity * 100)}%`, 344, y + 31, { size: 26, color: PALETTE.ink, align: 'right', outline: 0 });
 }
 
+/** The aiming cursor: a thimble ring with a red cross-stitch, drawn where the mouse points. */
+export function drawCursor(ctx, x, y, firing) {
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.strokeStyle = PALETTE.ink;
+  ctx.lineWidth = 6;
+  ctx.beginPath();
+  ctx.arc(0, 0, firing ? 11 : 14, 0, Math.PI * 2);
+  ctx.stroke();
+  ctx.strokeStyle = PALETTE.cream;
+  ctx.lineWidth = 3;
+  ctx.stroke();
+  ctx.strokeStyle = PALETTE.thread;
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.moveTo(-5, -5);
+  ctx.lineTo(5, 5);
+  ctx.moveTo(5, -5);
+  ctx.lineTo(-5, 5);
+  ctx.stroke();
+  ctx.restore();
+}
+
 /** The gold heirloom star, as embroidered on the heirloom patches. */
 function drawStar(ctx, x, y, r) {
   ctx.beginPath();

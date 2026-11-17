@@ -4,7 +4,7 @@
 // autopilot play. window.__stitch exposes the state to the headless play-test tool.
 import { createRun, stepRun, beginNextWave } from './game.js';
 import { draftUpgrades, takeUpgrade } from './upgrades.js';
-import { drawHud } from './hud.js';
+import { drawCursor, drawHud } from './hud.js';
 import { drawDraft, drawPause, drawResults, drawTitle, draftCardRects } from './screens.js';
 import { drawScene } from './render.js';
 import { createAudio } from './audio.js';
@@ -121,7 +121,7 @@ function finishRun() {
   state.summary = summarizeRun(run, previous);
   state.best = readBest();
   state.screen = 'over';
-  audio.play(run.outcome === 'win' ? 'win' : 'lose');
+  if (run.outcome === 'win') audio.play('win');
   announce(`Run over. Score ${run.score}. Press Enter to sew again.`);
 }
 
@@ -233,6 +233,9 @@ function render() {
   drawHud(ctx, run, state.best, t);
   if (state.screen === 'draft') drawDraft(ctx, run, state.choices, state.hover, state.draftAge);
   if (state.screen === 'pause') drawPause(ctx, audio.muted);
+  const aiming = state.screen === 'play' && input.mouse.moved && !shotName;
+  canvas.style.cursor = aiming ? 'none' : 'default';
+  if (aiming) drawCursor(ctx, input.mouse.x, input.mouse.y, input.mouse.down);
 }
 
 let last = 0;
