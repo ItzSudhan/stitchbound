@@ -4,7 +4,6 @@
 import { PALETTE } from './config.js';
 import { distance } from './geometry.js';
 import { burst, floatText, ring } from './effects.js';
-import { drawSpool } from './ui.js';
 
 const DROP_CHANCE = { beetle: 0.3, spitter: 0.35, snipper: 0.25, wyrmSegment: 0.18, silverfish: 0.04, moth: 0.02 };
 const LIFETIME = 9;
@@ -35,26 +34,7 @@ export function updatePickups(run, dt) {
   run.pickups = run.pickups.filter((pickup) => pickup.age < LIFETIME);
 }
 
-export function drawPickups(ctx, run, time) {
-  for (const pickup of run.pickups) {
-    const left = LIFETIME - pickup.age;
-    if (left < 2 && Math.floor(time * 10) % 2 === 0) continue;
-    const bob = Math.sin(time * 4 + pickup.x) * 4;
-    ctx.fillStyle = PALETTE.shadow;
-    ctx.beginPath();
-    ctx.ellipse(pickup.x + 4, pickup.y + 16, 16, 6, 0, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.strokeStyle = 'rgba(245,197,66,0.8)';
-    ctx.lineWidth = 3;
-    ctx.setLineDash([5, 4]);
-    ctx.beginPath();
-    ctx.arc(pickup.x, pickup.y + bob, 24 + Math.sin(time * 6) * 2, 0, Math.PI * 2);
-    ctx.stroke();
-    ctx.setLineDash([]);
-    ctx.save();
-    ctx.translate(pickup.x, pickup.y + bob);
-    ctx.scale(1.25, 1.25);
-    drawSpool(ctx, 0, 0, true);
-    ctx.restore();
-  }
+/** Seconds a dropped spool has left before it is gone. */
+export function spoolTimeLeft(pickup) {
+  return LIFETIME - pickup.age;
 }

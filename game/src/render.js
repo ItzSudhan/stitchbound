@@ -5,7 +5,8 @@ import { TAU } from './geometry.js';
 import { drawQuilt } from './quilt.js';
 import { cinchShape } from './game.js';
 import { buttonPositions } from './player.js';
-import { drawPickups } from './pickups.js';
+import { spoolTimeLeft } from './pickups.js';
+import { drawSpool } from './ui.js';
 import { drawFloaters, drawParticles, drawRings, drawScreenFlash, shakeOffset } from './effects.js';
 import {
   drawBeetle,
@@ -46,6 +47,30 @@ export function drawScene(ctx, run, time) {
   drawFloaters(ctx, run.fx);
   ctx.restore();
   drawScreenFlash(ctx, run.fx, VIEW.width, VIEW.height);
+}
+
+/** Spare spools bob on the quilt inside a gold stitched ring, and blink before they vanish. */
+function drawPickups(ctx, run, time) {
+  for (const pickup of run.pickups) {
+    if (spoolTimeLeft(pickup) < 2 && Math.floor(time * 10) % 2 === 0) continue;
+    const bob = Math.sin(time * 4 + pickup.x) * 4;
+    ctx.fillStyle = PALETTE.shadow;
+    ctx.beginPath();
+    ctx.ellipse(pickup.x + 4, pickup.y + 16, 16, 6, 0, 0, TAU);
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(245,197,66,0.8)';
+    ctx.lineWidth = 3;
+    ctx.setLineDash([5, 4]);
+    ctx.beginPath();
+    ctx.arc(pickup.x, pickup.y + bob, 24 + Math.sin(time * 6) * 2, 0, TAU);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.save();
+    ctx.translate(pickup.x, pickup.y + bob);
+    ctx.scale(1.25, 1.25);
+    drawSpool(ctx, 0, 0, true);
+    ctx.restore();
+  }
 }
 
 /** The night deepens as the run goes on: evening on night 1, deep indigo by the Matriarch. */
