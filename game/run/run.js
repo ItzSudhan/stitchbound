@@ -1,24 +1,24 @@
 // A run from start to finish: creates the run's state from its seed, mode and needle, and moves
 // it along the quilt road. enterNode opens the patch the player picked and says which screen
 // comes next; offers (notion drafts, relics, rests) are taken through takeOffer.
-import { ROAD_LENGTH } from '../core/config.js';
-import { createRandom, mixSeed } from '../core/random.js';
-import { createQuilt } from '../world/quilt.js';
-import { createThread } from '../world/thread.js';
-import { planNight, startNight } from '../world/nights.js';
-import { createPlayer } from '../entities/player.js';
 import { draftNotions } from '../items/notions.js';
 import { draftRelics } from '../items/relics.js';
 import { synergiesCompletedBy } from '../items/synergies.js';
-import { computeMods, gainRelic, refreshLoadout, takeNotion } from '../items/loadout.js';
 import { needleById } from '../meta/needles.js';
 import { dayKey, modeById } from '../meta/modes.js';
-import { createEffects } from '../render/effects.js';
 import { extendRoad, generateRoad, reachableNodes } from './route-map.js';
+import { createQuilt } from '../world/quilt.js';
+import { createThread } from '../world/thread.js';
+import { createEffects } from '../render/effects.js';
+import { createCombo } from './scoring.js';
+import { planNight, startNight } from '../world/nights.js';
+import { createPlayer } from '../entities/player.js';
+import { computeMods, gainRelic, refreshLoadout, takeNotion } from '../items/loadout.js';
 import { eventForNode } from './events.js';
 import { stockMerchant } from './merchant.js';
 import { restChoices, takeRest } from './camp.js';
-import { createCombo } from './scoring.js';
+import { ROAD_LENGTH } from '../core/config.js';
+import { createRandom, mixSeed } from '../core/random.js';
 
 export function createRun({ seed, modeId = 'classic', needleId = 'steel' }) {
   const mode = modeById(modeId);

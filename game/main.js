@@ -3,6 +3,7 @@
 // card choices, the peddler, mystery events, pause and the results card.
 // ?seed=N fixes a run; ?shot=<name> stages a screenshot scene (demo/shots.js); ?demo=1 lets the
 // autopilot play everything. window.__stitch exposes the state to the headless play-test tools.
+import { STEP, VIEW } from './core/config.js';
 import { createRun, enterNode, finishNode, nextNodes, offerNotions, takeOffer } from './run/run.js';
 import { stepNight } from './run/night.js';
 import { buyItem } from './run/merchant.js';
@@ -26,7 +27,6 @@ import { createAudio } from './audio/sound.js';
 import { createInput } from './core/input.js';
 import { bestScore, recordScore } from './core/storage.js';
 import { inRect } from './core/geometry.js';
-import { STEP, VIEW } from './core/config.js';
 
 const MAX_FRAME = 0.25;
 const END_DELAY = 1.8;
