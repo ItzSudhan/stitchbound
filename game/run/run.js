@@ -67,9 +67,7 @@ export function createRun({ seed, modeId = 'classic', needleId = 'steel' }) {
     offer: null,
     shop: null,
     event: null,
-    goals: null,
-    goalStart: { loops: 0 },
-    stats: { goals: 0, kills: 0, loops: 0, biggestLoop: 0, mended: 0, hits: 0, picks: [], sequins: 0, nightsFought: 0, wyrmBeaten: false },
+    stats: { kills: 0, loops: 0, biggestLoop: 0, mended: 0, hits: 0, picks: [], sequins: 0, nightsFought: 0, wyrmBeaten: false },
   };
   run.mods = computeMods(run).mods;
   run.player = createPlayer(run.mods);
@@ -112,35 +110,27 @@ export function enterNode(run, node) {
 
 /** After a cleared night: the notion draft (four cards with a Needle Case). */
 export function offerNotions(run) {
-  const choices = draftNotions(run.rng, run.owned, run.mods.draftSize).map((n) => {
-    const synergies = synergiesCompletedBy(run.owned, run.relics, { notion: n.id });
-    return {
-      kind: 'notion',
-      id: n.id,
-      name: n.name,
-      text: n.text,
-      color: n.color,
-      level: run.owned[n.id] ?? 0,
-      completes: synergies.map((s) => s.name),
-      completesText: synergies[0]?.text ?? '',
-    };
-  });
+  const choices = draftNotions(run.rng, run.owned, run.mods.draftSize).map((n) => ({
+    kind: 'notion',
+    id: n.id,
+    name: n.name,
+    text: n.text,
+    color: n.color,
+    level: run.owned[n.id] ?? 0,
+    completes: synergiesCompletedBy(run.owned, run.relics, { notion: n.id }).map((s) => s.name),
+  }));
   run.offer = { kind: 'notion', title: `NIGHT ${run.depth} SURVIVED`, subtitle: 'Choose a notion for your sewing box', choices };
 }
 
 function offerRelics(run, title, subtitle) {
-  const choices = draftRelics(run.rng, run.relics, 3).map((r) => {
-    const synergies = synergiesCompletedBy(run.owned, run.relics, { relic: r.id });
-    return {
-      kind: 'relic',
-      id: r.id,
-      name: r.name,
-      text: r.text,
-      color: r.color,
-      completes: synergies.map((s) => s.name),
-      completesText: synergies[0]?.text ?? '',
-    };
-  });
+  const choices = draftRelics(run.rng, run.relics, 3).map((r) => ({
+    kind: 'relic',
+    id: r.id,
+    name: r.name,
+    text: r.text,
+    color: r.color,
+    completes: synergiesCompletedBy(run.owned, run.relics, { relic: r.id }).map((s) => s.name),
+  }));
   if (choices.length === 0) return false;
   run.offer = { kind: 'relic', title, subtitle, choices };
   return true;
@@ -152,8 +142,6 @@ export function takeOffer(run, index) {
   const choice = offer.choices[index];
   if (!choice) return 'cards';
   if (offer.kind === 'notion') {
-    // Kept for the road map, which shows the last draft and the card taken from it.
-    run.lastDraft = { depth: run.depth, choices: offer.choices, picked: index };
     takeNotion(run, choice.id);
     if (run.night && (run.night.elite || run.night.boss) && offerRelics(run, run.night.boss ? 'THE BOSS FALLS' : 'ELITE SPOILS', 'Choose a relic')) return 'cards';
   } else if (offer.kind === 'relic') gainRelic(run, choice.id);

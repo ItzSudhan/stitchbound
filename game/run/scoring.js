@@ -2,7 +2,7 @@
 // climbs while kills keep coming and drops when the needle goes quiet; loop kills pay half again.
 // Sequins are the road's currency, spent at the peddler and on some mysteries.
 import { COMBO, PALETTE } from '../core/config.js';
-import { addCallout, floatText } from '../render/effects.js';
+import { floatText } from '../render/effects.js';
 
 export function createCombo() {
   return { count: 0, timer: 0, best: 1 };
@@ -14,11 +14,9 @@ export function comboMultiplier(run) {
 
 export function registerKill(run, enemy, source) {
   const combo = run.combo;
-  const before = comboMultiplier(run);
   combo.count += 1;
   combo.timer = COMBO.window;
   const multiplier = comboMultiplier(run);
-  if (multiplier > before && multiplier >= 3) addCallout(run.fx, `CHAIN x${multiplier}!`, '#ff7ab8');
   combo.best = Math.max(combo.best, multiplier);
   const points = Math.round(enemy.score * multiplier * (source === 'loop' ? 1.5 : 1));
   run.score += points;

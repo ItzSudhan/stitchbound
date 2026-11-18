@@ -6,7 +6,6 @@ import { TAU } from '../core/geometry.js';
 import { drawQuilt } from './quilt-art.js';
 import { drawCandles, drawFrayedPatches } from './patch-art.js';
 import { drawDarkness } from './darkness.js';
-import { darknessFor } from '../world/lighting.js';
 import { drawLintBall } from '../entities/lint-ball.js';
 import { drawBurrower } from '../entities/burrower.js';
 import { drawCarpetBeetle } from '../entities/carpet-beetle.js';
@@ -15,7 +14,7 @@ import { buttonPositions } from '../entities/player.js';
 import { spoolTimeLeft } from '../entities/pickups.js';
 import { needleById } from '../meta/needles.js';
 import { drawSpool } from '../ui/widgets.js';
-import { drawCallouts, drawFloaters, drawParticles, drawRings, drawScreenFlash, shakeOffset } from './effects.js';
+import { drawFloaters, drawParticles, drawRings, drawScreenFlash, shakeOffset } from './effects.js';
 import {
   drawBeetle,
   drawGuardButton,
@@ -49,33 +48,16 @@ export function drawScene(ctx, run, time, { needle = true } = {}) {
   // Deep nights: the dark hides the small pests; candles, bosses and shots show through it.
   if (run.inNight) drawDarkness(ctx, run, time);
   drawCandles(ctx, run.quilt, time);
-  for (const enemy of enemies) if (enemy.kind === 'wyrmSegment') drawEnemy(ctx, enemy, time);
-  for (const enemy of enemies) {
-    if (!isBoss(enemy) || enemy.kind === 'wyrmSegment') continue;
-    // A warm glow behind the boss so it reads at a glance, even on the darkest night.
-    const r = enemy.r * (enemy.kind === 'matriarch' ? 3 : 2.4);
-    const glow = ctx.createRadialGradient(enemy.x, enemy.y, enemy.r * 0.5, enemy.x, enemy.y, r);
-    glow.addColorStop(0, 'rgba(255,200,90,0.55)');
-    glow.addColorStop(1, 'rgba(255,200,90,0)');
-    ctx.fillStyle = glow;
-    ctx.beginPath();
-    ctx.arc(enemy.x, enemy.y, r, 0, TAU);
-    ctx.fill();
-    drawEnemy(ctx, enemy, time);
-  }
+  for (const enemy of enemies) if (isBoss(enemy)) drawEnemy(ctx, enemy, time);
   for (const shot of run.shots) drawShot(ctx, shot);
   for (const pin of run.pins) drawPin(ctx, pin);
   if (needle && (!run.outcome || run.outcome === 'win' || run.outcome === 'quilt')) {
     for (const b of buttonPositions(run)) drawGuardButton(ctx, b.x, b.y);
-    ctx.shadowColor = 'rgba(255,255,255,0.95)';
-    ctx.shadowBlur = 16;
     drawNeedle(ctx, run.player, time, needleById(run.needleId).color);
-    ctx.shadowBlur = 0;
   }
   drawRings(ctx, run.fx);
   drawParticles(ctx, run.fx);
   drawFloaters(ctx, run.fx);
-  drawCallouts(ctx, run.fx, VIEW.width);
   ctx.restore();
   drawScreenFlash(ctx, run.fx, VIEW.width, VIEW.height);
 }
@@ -107,8 +89,7 @@ function drawPickups(ctx, run, time) {
 /** The night deepens as the road goes on: evening on night 1, deep indigo by the Matriarch. */
 function drawNightShade(ctx, run) {
   const depth = Math.min(1, Math.max(0, run.depth - 1) / 9);
-  // On dark nights the darkness layer does this job, with light cut out of it.
-  if (depth <= 0 || (run.inNight && darknessFor(run.depth) > 0)) return;
+  if (depth <= 0) return;
   ctx.fillStyle = `rgba(28,20,64,${(0.2 * depth).toFixed(3)})`;
   ctx.fillRect(-40, -40, VIEW.width + 80, VIEW.height + 80);
 }
@@ -186,12 +167,9 @@ function drawThread(ctx, run, time) {
   ctx.strokeStyle = PALETTE.ink;
   ctx.lineWidth = 8;
   ctx.stroke();
-  ctx.shadowColor = '#ff5a5a';
-  ctx.shadowBlur = 14;
   ctx.strokeStyle = PALETTE.thread;
   ctx.lineWidth = 5;
   ctx.stroke();
-  ctx.shadowBlur = 0;
   ctx.strokeStyle = 'rgba(255,190,190,0.85)';
   ctx.lineWidth = 1.5;
   ctx.setLineDash([5, 7]);
@@ -229,17 +207,14 @@ function drawCinches(ctx, run) {
     ctx.beginPath();
     shape.forEach((pt, i) => (i === 0 ? ctx.moveTo(pt.x, pt.y) : ctx.lineTo(pt.x, pt.y)));
     ctx.closePath();
-    ctx.fillStyle = `rgba(255,214,90,${0.55 * (1 - t)})`;
+    ctx.fillStyle = `rgba(245,197,66,${0.45 * (1 - t)})`;
     ctx.fill();
     ctx.strokeStyle = PALETTE.ink;
     ctx.lineWidth = 10;
     ctx.stroke();
-    ctx.shadowColor = '#ffd45a';
-    ctx.shadowBlur = 26;
     ctx.strokeStyle = PALETTE.thread;
     ctx.lineWidth = 6.5;
     ctx.stroke();
-    ctx.shadowBlur = 0;
     ctx.strokeStyle = PALETTE.gold;
     ctx.lineWidth = 2.5;
     ctx.setLineDash([8, 6]);

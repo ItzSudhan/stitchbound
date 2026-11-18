@@ -1,6 +1,6 @@
 // The card that ends every run, win or lose: the headline, the final score, the run's numbers,
-// its build (relics, notions and the synergies they formed), any needle it unlocked, and the
-// PLAY AGAIN (R) and TITLE (Esc) buttons.
+// its build (relics, notions and the synergies they formed), any needle it unlocked, and how to
+// sew again.
 import { FONT, PALETTE, VIEW } from '../core/config.js';
 import { notionById } from '../items/notions.js';
 import { relicById } from '../items/relics.js';
@@ -13,8 +13,8 @@ const HEADLINES = {
   quilt: ['THE QUILT UNRAVELLED', 'The moths ate too much of the heirloom.', PALETTE.danger],
 };
 
-export function drawResults(ctx, summary, time, hover = null) {
-  dimScreen(ctx, VIEW.width, VIEW.height, 0.82);
+export function drawResults(ctx, summary, time) {
+  dimScreen(ctx, VIEW.width, VIEW.height, 0.62);
   const [title, line, color] = HEADLINES[summary.outcome];
   drawText(ctx, title, VIEW.width / 2, 70, { size: 70, color, font: FONT.display, outline: 10, stitch: PALETTE.cream });
   drawText(ctx, `${line}   ${summary.mode} · ${summary.needle}`, VIEW.width / 2, 132, { size: 24, color: PALETTE.cream, outline: 5 });
@@ -31,59 +31,41 @@ export function drawResults(ctx, summary, time, hover = null) {
     drawText(ctx, 'NEW BEST!', 0, 1, { size: 26, color: PALETTE.cream, outline: 4 });
     ctx.restore();
   }
-  // Six big stat chips: few words, large numbers, readable even as a thumbnail.
-  const chips = [
-    ['NIGHT', summary.endless ? String(summary.night) : `${summary.night}/10`, PALETTE.navy],
-    ['PESTS', formatNumber(summary.kills), PALETTE.plum],
-    ['LOOPS', formatNumber(summary.loops), PALETTE.thread],
-    ['HEIRLOOMS', `${summary.heirlooms}/8`, PALETTE.goldDeep],
-    ['GOALS MET', String(summary.goals), PALETTE.teal],
-    ['TIME', formatTime(summary.time), PALETTE.terracotta],
+  const stats = [
+    ['Night reached', summary.endless ? String(summary.night) : `${summary.night} / 10`],
+    ['Pests stitched', formatNumber(summary.kills)],
+    ['Loops closed', formatNumber(summary.loops)],
+    ['Biggest loop', `${summary.biggestLoop} caught`],
+    ['Cloth darned', `${summary.mended.toFixed(1)} patches`],
+    ['Heirlooms kept', `${summary.heirlooms} / 8`],
+    ['Sequins earned', formatNumber(summary.sequins)],
+    ['Top combo', `x${summary.combo}`],
+    ['Time', formatTime(summary.time)],
   ];
-  chips.forEach(([label, value, color], i) => {
-    const x = px + 500 + (i % 3) * 156;
-    const y = py + 30 + Math.floor(i / 3) * 132;
-    drawFeltPanel(ctx, x, y, 144, 116, color, 'rgba(246,236,214,0.6)', 12);
-    drawText(ctx, value, x + 72, y + 52, { size: value.length > 4 ? 34 : 40, color: '#ffffff', outline: 5, font: FONT.plain });
-    drawText(ctx, label, x + 72, y + 94, { size: 17, color: PALETTE.cream, outline: 3, font: FONT.plain });
+  stats.forEach(([label, value], i) => {
+    const y = py + 40 + i * 33;
+    drawText(ctx, label, px + 520, y, { size: 22, color: PALETTE.ink, align: 'left', outline: 0, weight: 'normal' });
+    drawText(ctx, value, px + 930, y, { size: 24, color: PALETTE.navy, align: 'right', outline: 0 });
   });
-  drawText(ctx, 'SYNERGIES', px + 250, py + 214, { size: 24, color: PALETTE.terracotta, outline: 0, font: FONT.plain });
+  drawText(ctx, 'SYNERGIES', px + 250, py + 214, { size: 22, color: PALETTE.terracotta, outline: 0 });
   const names = summary.synergies.length > 0 ? summary.synergies.slice(0, 3) : ['none this run'];
-  names.forEach((name, i) => drawText(ctx, name, px + 250, py + 250 + i * 36, { size: 30, color: summary.synergies.length ? PALETTE.goldDeep : PALETTE.steelDark, outline: 0, font: FONT.plain }));
-  drawText(ctx, `THE BUILD: ${summary.relics.length} relics, ${summary.owned.length} notions`, VIEW.width / 2, py + 372, { size: 22, color: PALETTE.terracotta, outline: 0, font: FONT.plain });
-  const kit = [...summary.relics.map((id) => ['relic', id]), ...summary.owned.map((id) => ['notion', id])].slice(0, 16);
-  const size = 50;
+  names.forEach((name, i) => drawText(ctx, name, px + 250, py + 246 + i * 30, { size: 24, color: summary.synergies.length ? PALETTE.goldDeep : PALETTE.steelDark, outline: 0 }));
+  drawText(ctx, `THE BUILD  ·  ${summary.quiltName} quilt`, VIEW.width / 2, py + 362, { size: 20, color: PALETTE.terracotta, outline: 0 });
+  const kit = [...summary.relics.map((id) => ['relic', id]), ...summary.owned.map((id) => ['notion', id])].slice(0, 20);
+  const size = 40;
   let x = VIEW.width / 2 - (kit.length * (size + 6) - 6) / 2 + size / 2;
   for (const [kind, id] of kit) {
-    if (kind === 'relic') drawRelicIcon(ctx, relicById(id), x, py + 428, size);
-    else drawNotionIcon(ctx, notionById(id), x, py + 428, size);
+    if (kind === 'relic') drawRelicIcon(ctx, relicById(id), x, py + 412, size);
+    else drawNotionIcon(ctx, notionById(id), x, py + 412, size);
     x += size + 6;
   }
   if (summary.unlocked.length > 0) {
-    drawFeltPanel(ctx, px + 190, py + 462, 600, 44, '#2b1f33', PALETTE.gold, 12);
-    drawText(ctx, `UNLOCKED: ${summary.unlocked.join(', ')}!`, VIEW.width / 2, py + 485, { size: 22, color: PALETTE.gold, outline: 3 });
+    drawFeltPanel(ctx, px + 190, py + 446, 600, 44, '#2b1f33', PALETTE.gold, 12);
+    drawText(ctx, `UNLOCKED: ${summary.unlocked.join(', ')}!`, VIEW.width / 2, py + 469, { size: 22, color: PALETTE.gold, outline: 3 });
   }
-  drawRestart(ctx, time, hover);
-}
-
-/** Where the results card's buttons sit. */
-export function resultsLayout() {
-  return {
-    again: { x: 400, y: 676, w: 480, h: 82 },
-    title: { x: 910, y: 690, w: 220, h: 56 },
-  };
-}
-
-/** The restart: one big PLAY AGAIN button, and a smaller way back to the title. */
-function drawRestart(ctx, time, hover) {
-  const { again, title } = resultsLayout();
-  const pulse = 1 + Math.sin(time * 4) * 0.025;
-  ctx.save();
-  ctx.translate(again.x + again.w / 2, again.y + again.h / 2);
-  ctx.scale(pulse, pulse);
-  drawFeltPanel(ctx, -again.w / 2, -again.h / 2, again.w, again.h, hover === 'again' ? PALETTE.terracotta : PALETTE.thread, 'rgba(246,236,214,0.85)', 18);
-  drawText(ctx, 'PLAY AGAIN  (R)', 0, 2, { size: 44, color: PALETTE.cream, outline: 7, font: FONT.plain });
-  ctx.restore();
-  drawFeltPanel(ctx, title.x, title.y, title.w, title.h, hover === 'title' ? PALETTE.thread : PALETTE.navy, 'rgba(246,236,214,0.6)', 14);
-  drawText(ctx, 'TITLE  (ESC)', title.x + title.w / 2, title.y + title.h / 2 + 1, { size: 24, color: PALETTE.cream, outline: 4, font: FONT.plain });
+  const pulse = 0.85 + 0.15 * Math.sin(time * 5);
+  ctx.globalAlpha = pulse;
+  drawText(ctx, 'CLICK or press ENTER to sew again', VIEW.width / 2, 712, { size: 38, color: PALETTE.cream, outline: 8 });
+  ctx.globalAlpha = 1;
+  drawText(ctx, 'ESC  back to title', VIEW.width / 2, 764, { size: 22, color: PALETTE.gold, outline: 5 });
 }

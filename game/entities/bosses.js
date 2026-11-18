@@ -30,10 +30,6 @@ export function updateWyrmHead(run, head, dt) {
     ty = VIEW.height / 2;
   }
   const lunge = head.state === 'lunge';
-  // Phase 2 below half health: lunges come sooner and shed bigger rings.
-  head.phase = head.hp < head.maxHp / 2 ? 2 : 1;
-  head.phases = 2;
-  head.attack = lunge ? 'Lunge and dust ring' : head.phase === 2 ? 'Frantic coiling' : 'Coiling chase';
   const want = Math.atan2(ty - head.y, tx - head.x) + Math.sin(head.age * 2.4) * 0.7;
   head.angle += clamp(angleDelta(head.angle, want), -2.4 * dt, 2.4 * dt);
   const speed = head.speed * (lunge ? 2.3 : 1);
@@ -44,8 +40,8 @@ export function updateWyrmHead(run, head, dt) {
   if (head.timer <= 0) {
     if (lunge) {
       head.state = 'move';
-      head.timer = head.phase === 2 ? 2 : 3.2;
-      spawnShotRing(run, head.x, head.y, head.phase === 2 ? 15 : 10, 150, 'dust', head.age);
+      head.timer = 3.2;
+      spawnShotRing(run, head.x, head.y, 10, 150, 'dust', head.age);
       run.events.push({ type: 'enemyShoot' });
     } else {
       head.state = 'lunge';
@@ -91,8 +87,6 @@ function matriarchPhase(boss) {
 export function updateMatriarch(run, boss, dt) {
   const t = boss.age;
   if (boss.entering) {
-    boss.phases = 3;
-    boss.attack = 'Descending';
     boss.y += (230 - boss.y) * Math.min(1, dt * 1.5);
     boss.passive = true;
     if (boss.y > 220) {
@@ -103,8 +97,6 @@ export function updateMatriarch(run, boss, dt) {
     return;
   }
   const phase = matriarchPhase(boss);
-  boss.phases = 3;
-  boss.attack = ['', 'Dust rings and guard moths', 'Dust spiral and rings', 'Frenzy: spirals and silverfish'][phase];
   if (phase !== boss.phase) {
     boss.phase = phase;
     summonGuards(run, boss, phase === 3 ? 8 : 7);

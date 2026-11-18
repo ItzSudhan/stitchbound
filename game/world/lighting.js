@@ -4,17 +4,17 @@
 import { distance } from '../core/geometry.js';
 import { litCandles } from './patches.js';
 
-export const CANDLE_RADIUS = 240;
+export const CANDLE_RADIUS = 190;
 const LIT_BONUS = 1.25;
 
-/** How dark the night is: 0 on the first nights, up to 0.5 deep in the road. */
+/** How dark the night is: 0 on the first nights, up to 0.78 deep in the road. */
 export function darknessFor(depth) {
-  return depth < 3 ? 0 : Math.min(0.5, 0.08 * (depth - 2));
+  return depth < 3 ? 0 : Math.min(0.78, 0.13 * (depth - 2));
 }
 
 /** Every light on the board this frame: {x, y, r}. */
 export function lightSources(run) {
-  const lights = [{ x: run.player.x, y: run.player.y, r: 190 * run.mods.lightRadius }];
+  const lights = [{ x: run.player.x, y: run.player.y, r: 150 * run.mods.lightRadius }];
   for (const candle of litCandles(run.quilt)) lights.push({ x: candle.cx, y: candle.cy, r: CANDLE_RADIUS, candle: true });
   for (const cinch of run.cinches) lights.push({ x: cinch.centre.x, y: cinch.centre.y, r: 220 * (1 - cinch.age / cinch.life) + 60 });
   return lights;

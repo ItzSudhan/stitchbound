@@ -9,10 +9,10 @@ import { distance } from '../core/geometry.js';
 import { nibblePatch } from './quilt.js';
 
 export const PATCH_KINDS = {
-  snag: { name: 'Snag', text: 'Pulled loops: the needle drags at half speed', short: 'Slows the needle', from: 1, color: '#7a3b2e' },
-  button: { name: 'Button', text: 'Pins that cross it ricochet to a pest', short: 'Pins ricochet', from: 2, color: '#2b4166' },
-  candle: { name: 'Candle', text: 'Lights the dark; moths flock to it', short: 'Light; draws moths', from: 3, color: '#f5c542' },
-  frayed: { name: 'Frayed', text: 'Unravels and spreads unless darned', short: 'Spreads till darned', from: 4, color: '#e0473a' },
+  snag: { name: 'Snag', text: 'Pulled loops: the needle drags at half speed', from: 1, color: '#7a3b2e' },
+  button: { name: 'Button Patch', text: 'Pins that cross it ricochet to a pest', from: 2, color: '#2b4166' },
+  candle: { name: 'Candle Patch', text: 'Lights the dark; moths flock to it', from: 3, color: '#f5c542' },
+  frayed: { name: 'Frayed Patch', text: 'Unravels and spreads unless darned', from: 4, color: '#e0473a' },
 };
 
 const FRAY_RATE = 0.018;

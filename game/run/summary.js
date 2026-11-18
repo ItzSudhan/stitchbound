@@ -21,7 +21,6 @@ export function summarizeRun(run, previousBest, unlocked = []) {
     mended: run.stats.mended,
     sequins: run.stats.sequins,
     combo: run.combo.best,
-    goals: run.stats.goals,
     heirlooms: heirloomsKept(run.quilt),
     time: run.time,
     owned: Object.keys(run.owned),

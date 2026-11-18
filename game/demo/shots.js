@@ -45,13 +45,12 @@ function coverScore(run) {
   if (!boss) return -1;
   const p = run.player;
   if (boss.flash > 0.5 || run.fx.flash > 0.02 || run.fx.floaters.length > 12 || run.announcements.length > 0) return -1;
-  if (p.x < 260 || p.x > 1020 || p.y < 200 || p.y > 680 || p.invuln > 0 || boss.y > 560 || boss.y < 280 || boss.x < 340 || boss.x > 940) return -1;
+  if (p.x < 120 || p.x > 1160 || p.y < 160 || p.y > 600 || p.invuln > 0 || boss.y > 520) return -1;
   const apart = Math.hypot(p.x - boss.x, p.y - boss.y);
   const offCentre = Math.hypot(boss.x - 640, boss.y - 400);
   const spacing = apart < 190 ? -120 : apart < 430 ? 30 : 0;
   const spools = p.hp <= 1 ? -60 : p.hp >= 3 ? 25 : 0;
-  const callout = run.fx.callouts.some((c) => c.age > 0.1 && c.age < 0.9) ? 160 : 0;
-  return spectacle(run) + callout - offCentre * 0.12 + (boss.spiralLeft > 0 ? 40 : 0) + (boss.hp / boss.maxHp) * 60 + spools + spacing;
+  return spectacle(run) - offCentre * 0.12 + (boss.spiralLeft > 0 ? 40 : 0) + (boss.hp / boss.maxHp) * 60 + spools + spacing;
 }
 
 export function stageShot(name, seed, needleId = 'steel') {
@@ -93,7 +92,7 @@ export function stageShot(name, seed, needleId = 'steel') {
     case 'title': {
       // The title as it looks after this seed's run has been played once: its score is the best.
       const best = driveRun(options, () => false).run.score;
-      const calm = (r) => r.fx.callouts.length === 0 && r.fx.floaters.length === 0;
+      const calm = (r) => r.fx.floaters.length === 0;
       const { run } = driveRun(options, (r) => r.inNight && r.time > 9 && calm(r));
       return { screen: 'title', run, time: 9, best };
     }

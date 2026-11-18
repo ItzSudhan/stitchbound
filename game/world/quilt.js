@@ -78,10 +78,8 @@ export function nibblePatch(quilt, patch, amount) {
 /** Mends every patch whose centre lies inside the loop; returns how much cloth came back. */
 export function mendInside(quilt, polygon, amount) {
   let restored = 0;
-  quilt.lastMended = 0;
   for (const patch of quilt.patches) {
     if (!pointInPolygon(patch.cx, patch.cy, polygon)) continue;
-    if (patch.hp < 1 || patch.kind === 'frayed') quilt.lastMended += 1;
     // Darning a frayed patch stops it unravelling.
     if (patch.kind === 'frayed') patch.kind = null;
     if (patch.hp >= 1) continue;

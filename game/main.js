@@ -13,14 +13,13 @@ import { MODES, modeById, seedForMode } from './meta/modes.js';
 import { NEEDLES, isUnlocked } from './meta/needles.js';
 import { currentProgress, recordRunProgress } from './meta/progress.js';
 import { drawScene } from './render/scene.js';
-import { drawCursor, drawFieldOverlays, drawHud } from './ui/hud.js';
-import { drawHudStrips } from './ui/hud-strips.js';
+import { drawCursor, drawHud } from './ui/hud.js';
 import { drawTitle, titleLayout } from './ui/title-screen.js';
 import { drawRoad, nodeRect, visibleNodes } from './ui/road-screen.js';
 import { cardRects, drawCards } from './ui/cards-screen.js';
 import { drawShop, shopLayout } from './ui/shop-screen.js';
 import { drawEvent, eventLayout } from './ui/event-screen.js';
-import { drawResults, resultsLayout } from './ui/results-screen.js';
+import { drawResults } from './ui/results-screen.js';
 import { drawPause } from './ui/pause-screen.js';
 import { CODEX_BACK, drawCodex } from './ui/codex-screen.js';
 import { createPilot, pilotChooseCard, pilotChooseNode, pilotChooseOption, pilotChooseWare, pilotIntent } from './demo/autopilot.js';
@@ -60,7 +59,6 @@ const state = {
   modeIndex: 0,
   needleIndex: 0,
   progress: currentProgress(),
-  showPanels: true,
 };
 
 let pixelScale = 1;
@@ -203,7 +201,6 @@ function handleMenus() {
       break;
     }
     case 'play':
-      if (input.anyPressed('KeyH')) state.showPanels = !state.showPanels;
       if (input.anyPressed('KeyP', 'Escape')) {
         setScreen('pause');
         audio.play('pause');
@@ -252,13 +249,10 @@ function handleMenus() {
       if (pick >= 0 && !chooseEventOption(run, event, pick)) audio.play('deny');
       break;
     }
-    case 'over': {
-      const layout = resultsLayout();
-      state.hover = inRect(m.x, m.y, layout.again) ? 'again' : inRect(m.x, m.y, layout.title) ? 'title' : null;
-      if (input.anyPressed('Escape') || (m.clicked && state.hover === 'title')) goToTitle();
+    case 'over':
+      if (input.anyPressed('Escape')) goToTitle();
       else if ((confirm || input.anyPressed('KeyR') || m.clicked) && state.endTimer > 0.6) startRun();
       break;
-    }
     default:
       break;
   }
@@ -334,19 +328,13 @@ function render() {
   }
   const run = state.run;
   const field = state.screen === 'play' || state.screen === 'pause' || (state.screen === 'cards' && run.inNight) || state.screen === 'over';
-  const panels = field && state.showPanels;
   drawScene(ctx, run, t, { needle: field });
-  if (panels) {
-    // The full HUD as slim translucent strips over the full-screen field.
-    drawFieldOverlays(ctx, run, t);
-    drawHudStrips(ctx, run, bestForMode(), t);
-  }
   switch (state.screen) {
     case 'map':
       drawRoad(ctx, run, { reachable: nextNodes(run), hover: state.hover, time: t });
       break;
     case 'cards':
-      if (run.inNight && !panels) drawHud(ctx, run, bestForMode(), t);
+      if (run.inNight) drawHud(ctx, run, bestForMode(), t);
       drawCards(ctx, run.offer, state.hover, state.cardAge);
       break;
     case 'shop':
@@ -356,10 +344,10 @@ function render() {
       drawEvent(ctx, run, run.event, state.hover, t);
       break;
     case 'over':
-      drawResults(ctx, state.summary, t, state.hover);
+      drawResults(ctx, state.summary, t);
       break;
     default:
-      if (!panels) drawHud(ctx, run, bestForMode(), t);
+      drawHud(ctx, run, bestForMode(), t);
       if (state.screen === 'pause') drawPause(ctx, audio.muted);
   }
   const aiming = state.screen === 'play' && input.mouse.moved && !shotName;
