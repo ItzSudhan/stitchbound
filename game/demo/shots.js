@@ -44,7 +44,7 @@ function coverScore(run) {
   const boss = run.depth === 10 ? bossOnScreen(run, 'matriarch') : null;
   if (!boss) return -1;
   const p = run.player;
-  if (boss.flash > 0.5 || run.fx.flash > 0.02 || run.fx.floaters.length > 7 || run.announcements.length > 0) return -1;
+  if (boss.flash > 0.5 || run.fx.flash > 0.02 || run.fx.floaters.length > 12 || run.announcements.length > 0) return -1;
   if (p.x < 120 || p.x > 1160 || p.y < 160 || p.y > 600 || p.invuln > 0 || boss.y > 520) return -1;
   const apart = Math.hypot(p.x - boss.x, p.y - boss.y);
   const offCentre = Math.hypot(boss.x - 640, boss.y - 400);

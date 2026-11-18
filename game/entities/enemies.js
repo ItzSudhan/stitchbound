@@ -22,9 +22,9 @@ export const ENEMY_KINDS = {
   beetle: { hp: 48, r: 21, speed: 72, score: 220, sequins: 3, colors: ['#2b4166', '#6f8fb3', '#f6ecd6'] },
   snipper: { hp: 30, r: 16, speed: 150, score: 180, sequins: 2, colors: ['#7a3b2e', '#d9dde3'] },
   spitter: { hp: 60, r: 23, speed: 42, score: 260, sequins: 3, colors: ['#d6333f', '#94b283', '#f6ecd6'] },
-  wyrm: { hp: 420, r: 27, speed: 150, score: 2000, sequins: 25, colors: ['#e07a5f', '#f4a7a1', '#f6ecd6'] },
+  wyrm: { hp: 650, r: 27, speed: 150, score: 2000, sequins: 25, colors: ['#e07a5f', '#f4a7a1', '#f6ecd6'] },
   wyrmSegment: { hp: 70, r: 21, speed: 0, score: 120, sequins: 1, colors: ['#e07a5f', '#f2cc8f'] },
-  matriarch: { hp: 4200, r: 72, speed: 70, score: 10000, sequins: 40, colors: ['#5e4170', '#9c7bb0', '#f5c542', '#f6ecd6'] },
+  matriarch: { hp: 9000, r: 72, speed: 70, score: 10000, sequins: 40, colors: ['#5e4170', '#9c7bb0', '#f5c542', '#f6ecd6'] },
 };
 
 const BEHAVIOURS = {
@@ -73,6 +73,7 @@ export function spawnEnemy(run, kind, x, y, extra = {}) {
     ...extra,
   };
   run.enemies.push(enemy);
+  run.seen.pests.add(kind);
   return enemy;
 }
 
@@ -159,7 +160,8 @@ function pickPatch(run, enemy) {
   let bestScore = Infinity;
   for (let i = 0; i < 6; i += 1) {
     const patch = run.rng.pick(patches);
-    const craving = patch.heirloom ? 0.45 : 1;
+    // Moths crave heirlooms, and on dark nights they are drawn to lit candles.
+    const craving = patch.kind === 'candle' && patch.hp > 0.4 ? 0.3 : patch.heirloom ? 0.45 : 1;
     const score = distance(enemy.x, enemy.y, patch.cx, patch.cy) * run.rng.range(0.6, 1.2) * craving;
     if (score < bestScore) {
       best = patch;

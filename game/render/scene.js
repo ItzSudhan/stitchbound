@@ -4,6 +4,8 @@
 import { PALETTE, VIEW } from '../core/config.js';
 import { TAU } from '../core/geometry.js';
 import { drawQuilt } from './quilt-art.js';
+import { drawCandles, drawFrayedPatches } from './patch-art.js';
+import { drawDarkness } from './darkness.js';
 import { cinchShape } from '../run/night.js';
 import { buttonPositions } from '../entities/player.js';
 import { spoolTimeLeft } from '../entities/pickups.js';
@@ -32,12 +34,18 @@ export function drawScene(ctx, run, time, { needle = true } = {}) {
   ctx.translate(shake.x, shake.y);
   drawQuilt(ctx, run.quilt);
   drawNightShade(ctx, run);
+  drawFrayedPatches(ctx, run.quilt, time);
   drawCinches(ctx, run);
   if (needle) drawThread(ctx, run, time);
   drawTelegraphs(ctx, run);
   drawPickups(ctx, run, time);
-  const enemies = [...run.enemies].sort((a, b) => DRAW_ORDER[a.kind] - DRAW_ORDER[b.kind] || (b.index ?? 0) - (a.index ?? 0));
-  for (const enemy of enemies) drawEnemy(ctx, enemy, time);
+  const enemies = [...run.enemies].sort((a, b) => (DRAW_ORDER[a.kind] ?? 3) - (DRAW_ORDER[b.kind] ?? 3) || (b.index ?? 0) - (a.index ?? 0));
+  const isBoss = (e) => e.kind === 'matriarch' || e.kind === 'wyrm' || e.kind === 'wyrmSegment';
+  for (const enemy of enemies) if (!isBoss(enemy)) drawEnemy(ctx, enemy, time);
+  // Deep nights: the dark hides the small pests; candles, bosses and shots show through it.
+  if (run.inNight) drawDarkness(ctx, run, time);
+  drawCandles(ctx, run.quilt, time);
+  for (const enemy of enemies) if (isBoss(enemy)) drawEnemy(ctx, enemy, time);
   for (const shot of run.shots) drawShot(ctx, shot);
   for (const pin of run.pins) drawPin(ctx, pin);
   if (needle && (!run.outcome || run.outcome === 'win' || run.outcome === 'quilt')) {

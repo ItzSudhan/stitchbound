@@ -4,6 +4,7 @@
 import { mendInside, quiltIntegrity, updateQuilt } from '../world/quilt.js';
 import { extendThread, threadTouches, updateThread } from '../world/thread.js';
 import { updateNight } from '../world/nights.js';
+import { updatePatches } from '../world/patches.js';
 import { damageEnemy, updateEnemies } from '../entities/enemies.js';
 import { buttonPositions, updatePlayer } from '../entities/player.js';
 import { updatePins, updateShots } from '../entities/projectiles.js';
@@ -34,6 +35,7 @@ export function stepNight(run, intent, dt) {
     updatePins(run, dt);
     updateShots(run, dt);
     updatePickups(run, dt);
+    updatePatches(run, dt);
     updateNight(run, dt);
   }
   updateThread(run.thread, dt);
@@ -67,9 +69,9 @@ export function cinchLoop(run, polygon) {
   const area = polygonArea(polygon);
   let caught = 0;
   for (const enemy of run.enemies) {
-    if (enemy.dead || !pointInPolygon(enemy.x, enemy.y, polygon)) continue;
+    if (enemy.dead || enemy.buried || !pointInPolygon(enemy.x, enemy.y, polygon)) continue;
     caught += 1;
-    const damage = run.mods.loopDamage * (enemy.kind === 'matriarch' ? 1.4 : 1);
+    const damage = enemy.kind === 'matriarch' ? Math.min(450, run.mods.loopDamage * 1.4) : run.mods.loopDamage;
     damageEnemy(run, enemy, damage, 'loop');
     burst(fx, enemy.x, enemy.y, { count: 8, colors: [PALETTE.thread, PALETTE.gold], speed: 180, size: 6, kind: 'spark' });
   }

@@ -63,6 +63,7 @@ export function createRun({ seed, modeId = 'classic', needleId = 'steel' }) {
     outcome: null,
     events: [],
     announcements: [],
+    seen: { pests: new Set(), patches: new Set() },
     offer: null,
     shop: null,
     event: null,

@@ -5,6 +5,8 @@ import { distance, TAU } from '../core/geometry.js';
 import { damageEnemy } from './enemies.js';
 import { buttonPositions, hurtPlayer } from './player.js';
 import { burst } from '../render/effects.js';
+import { buttonPatchHit } from '../world/patches.js';
+import { lightDamageBonus } from '../world/lighting.js';
 
 const PIN_SPREAD = 0.13;
 
@@ -40,11 +42,20 @@ export function updatePins(run, dt) {
     pin.y += pin.vy * dt;
     if (pin.x < -20 || pin.y < -20 || pin.x > VIEW.width + 20 || pin.y > VIEW.height + 20) pin.life = 0;
     if (pin.life <= 0) continue;
+    // A button patch bounces the pin toward the nearest pest.
+    const button = buttonPatchHit(run.quilt, pin);
+    if (button) {
+      pin.buttons = pin.buttons ?? new Set();
+      pin.buttons.add(button);
+      redirectPin(run, pin);
+      burst(run.fx, pin.x, pin.y, { count: 4, colors: ['#f6ecd6', '#6f8fb3'], speed: 120, size: 3, life: 0.25, kind: 'spark' });
+      run.events.push({ type: 'block' });
+    }
     for (const enemy of run.enemies) {
-      if (enemy.dead || pin.hit.has(enemy.id)) continue;
+      if (enemy.dead || enemy.buried || pin.hit.has(enemy.id)) continue;
       if (distance(pin.x, pin.y, enemy.x, enemy.y) > enemy.r + 6) continue;
       pin.hit.add(enemy.id);
-      damageEnemy(run, enemy, pin.damage, pin.crit ? 'crit' : 'pin', pin.vx, pin.vy);
+      damageEnemy(run, enemy, pin.damage * lightDamageBonus(run, enemy), pin.crit ? 'crit' : 'pin', pin.vx, pin.vy);
       if (pin.bounce > 0) {
         pin.bounce -= 1;
         redirectPin(run, pin);
@@ -64,7 +75,7 @@ function redirectPin(run, pin) {
   let best = null;
   let bestDist = 420;
   for (const enemy of run.enemies) {
-    if (enemy.dead || pin.hit.has(enemy.id)) continue;
+    if (enemy.dead || enemy.buried || pin.hit.has(enemy.id)) continue;
     const d = distance(pin.x, pin.y, enemy.x, enemy.y);
     if (d < bestDist) {
       best = enemy;

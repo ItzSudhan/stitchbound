@@ -54,6 +54,7 @@ export const PLAYER_BASE = {
   loopHeal: false,
   heirloomBonus: 1,
   restHeal: 2,
+  lightRadius: 1,
 };
 
 /** Combo: kills within this many seconds of each other raise the score multiplier. */

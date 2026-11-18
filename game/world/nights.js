@@ -9,6 +9,7 @@ import { spawnAtEdge } from '../entities/enemies.js';
 import { spawnMatriarch, spawnWyrm } from '../entities/bosses.js';
 import { darnPatches, heirloomsKept, quiltIntegrity } from './quilt.js';
 import { modifierById } from './modifiers.js';
+import { generateBoard } from './quilt-gen.js';
 import { addBonus, awardSequins } from '../run/scoring.js';
 
 const KIND_COST = { moth: 1, silverfish: 0.5, beetle: 2.5, spitter: 3, snipper: 2.5 };
@@ -82,6 +83,8 @@ export function planNight(run, node) {
 
 /** Puts a planned night on the quilt: clears the field and queues its pests. */
 export function startNight(run, night) {
+  run.quilt = generateBoard(run.seed, night.depth, run.quilt.eaten);
+  for (const patch of run.quilt.patches) if (patch.kind) run.seen.patches.add(patch.kind);
   run.night = night;
   run.waveTime = 0;
   run.wavePhase = 'intro';

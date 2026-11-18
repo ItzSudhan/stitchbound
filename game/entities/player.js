@@ -5,6 +5,7 @@ import { VIEW, PALETTE } from '../core/config.js';
 import { angleDelta, clamp, TAU } from '../core/geometry.js';
 import { firePinAt, firePins } from './projectiles.js';
 import { damageEnemy } from './enemies.js';
+import { dragAt } from '../world/patches.js';
 import { addShake, burst, floatText, ring, screenFlash } from '../render/effects.js';
 
 export function createPlayer(mods) {
@@ -68,8 +69,9 @@ export function updatePlayer(run, intent, dt) {
     if (mods.dashDamage > 0) ripThrough(run, p);
   } else {
     const blend = 1 - Math.exp(-mods.accel * dt);
-    p.vx += (mx * mods.speed - p.vx) * blend;
-    p.vy += (my * mods.speed - p.vy) * blend;
+    const speed = mods.speed * dragAt(run.quilt, p.x, p.y);
+    p.vx += (mx * speed - p.vx) * blend;
+    p.vy += (my * speed - p.vy) * blend;
   }
 
   p.x = clamp(p.x + p.vx * dt, 18, VIEW.width - 18);

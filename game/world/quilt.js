@@ -46,6 +46,7 @@ export function createQuilt(seed) {
         mendFlash: 0,
         biteFlash: 0,
         heirloom: false,
+        kind: null,
       });
     }
   }
@@ -78,7 +79,10 @@ export function nibblePatch(quilt, patch, amount) {
 export function mendInside(quilt, polygon, amount) {
   let restored = 0;
   for (const patch of quilt.patches) {
-    if (patch.hp >= 1 || !pointInPolygon(patch.cx, patch.cy, polygon)) continue;
+    if (!pointInPolygon(patch.cx, patch.cy, polygon)) continue;
+    // Darning a frayed patch stops it unravelling.
+    if (patch.kind === 'frayed') patch.kind = null;
+    if (patch.hp >= 1) continue;
     const before = patch.hp;
     patch.hp = Math.min(1, patch.hp + amount);
     restored += patch.hp - before;
@@ -94,6 +98,7 @@ export function darnPatches(quilt, patches) {
   const worn = quilt.patches.filter((p) => p.hp < 1).sort((a, b) => a.hp - b.hp);
   for (const patch of worn) {
     if (left <= 0) break;
+    if (patch.kind === 'frayed') patch.kind = null;
     const add = Math.min(1 - patch.hp, left);
     patch.hp += add;
     left -= add;

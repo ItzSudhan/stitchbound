@@ -119,6 +119,8 @@ function paintPatch(ctx, patch, rng) {
   }
   ctx.globalAlpha = 1;
   if (patch.heirloom) paintHeirloom(ctx, patch);
+  if (patch.kind === 'snag') paintSnag(ctx, patch, rng);
+  if (patch.kind === 'button') paintButtonPatch(ctx, patch);
   // Raised seam shading and the running stitch just inside each edge.
   ctx.fillStyle = 'rgba(255,255,255,0.18)';
   ctx.fillRect(x, y, s, 3);
@@ -161,6 +163,52 @@ function paintHeirloom(ctx, patch) {
     ctx.lineTo(cx + Math.cos(a) * 20, cy + Math.sin(a) * 20);
     ctx.stroke();
   }
+}
+
+/** A snag: dark loops of pulled thread tangled across the patch. */
+function paintSnag(ctx, patch, rng) {
+  ctx.fillStyle = 'rgba(60,30,20,0.55)';
+  ctx.fillRect(patch.x, patch.y, PATCH.size, PATCH.size);
+  ctx.strokeStyle = '#e8b49a';
+  ctx.lineWidth = 4;
+  for (let i = 0; i < 7; i += 1) {
+    const x = patch.x + rng.range(14, PATCH.size - 14);
+    const y = patch.y + rng.range(14, PATCH.size - 14);
+    ctx.beginPath();
+    ctx.ellipse(x, y, rng.range(6, 12), rng.range(4, 8), rng.range(0, TAU), 0, TAU);
+    ctx.stroke();
+  }
+  ctx.strokeStyle = 'rgba(255,230,200,0.5)';
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  for (let i = 0; i <= 8; i += 1) ctx.lineTo(patch.x + 8 + i * 8, patch.y + PATCH.size / 2 + (i % 2 ? -10 : 10));
+  ctx.stroke();
+}
+
+/** A button patch: one big four-hole button sewn on with cross stitches. */
+function paintButtonPatch(ctx, patch) {
+  const cx = patch.x + PATCH.size / 2;
+  const cy = patch.y + PATCH.size / 2;
+  ctx.fillStyle = PALETTE.navy;
+  ctx.strokeStyle = PALETTE.ink;
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.arc(cx, cy, 26, 0, TAU);
+  ctx.fill();
+  ctx.stroke();
+  ctx.strokeStyle = '#8fb0d6';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.arc(cx, cy, 19, 0, TAU);
+  ctx.stroke();
+  ctx.strokeStyle = PALETTE.cream;
+  ctx.lineWidth = 2.5;
+  ctx.beginPath();
+  ctx.moveTo(cx - 7, cy - 7);
+  ctx.lineTo(cx + 7, cy + 7);
+  ctx.moveTo(cx + 7, cy - 7);
+  ctx.lineTo(cx - 7, cy + 7);
+  ctx.stroke();
 }
 
 /** A five-point star path (filled or stroked by the caller). */
