@@ -1,6 +1,6 @@
 // The card that ends every run, win or lose: the headline, the final score, the run's numbers,
-// its build (relics, notions and the synergies they formed), any needle it unlocked, and how to
-// sew again.
+// its build (relics, notions and the synergies they formed), any needle it unlocked, and the
+// PLAY AGAIN (R) and TITLE (Esc) buttons.
 import { FONT, PALETTE, VIEW } from '../core/config.js';
 import { notionById } from '../items/notions.js';
 import { relicById } from '../items/relics.js';
@@ -13,7 +13,7 @@ const HEADLINES = {
   quilt: ['THE QUILT UNRAVELLED', 'The moths ate too much of the heirloom.', PALETTE.danger],
 };
 
-export function drawResults(ctx, summary, time) {
+export function drawResults(ctx, summary, time, hover = null) {
   dimScreen(ctx, VIEW.width, VIEW.height, 0.82);
   const [title, line, color] = HEADLINES[summary.outcome];
   drawText(ctx, title, VIEW.width / 2, 70, { size: 70, color, font: FONT.display, outline: 10, stitch: PALETTE.cream });
@@ -63,9 +63,27 @@ export function drawResults(ctx, summary, time) {
     drawFeltPanel(ctx, px + 190, py + 462, 600, 44, '#2b1f33', PALETTE.gold, 12);
     drawText(ctx, `UNLOCKED: ${summary.unlocked.join(', ')}!`, VIEW.width / 2, py + 485, { size: 22, color: PALETTE.gold, outline: 3 });
   }
-  const pulse = 0.85 + 0.15 * Math.sin(time * 5);
-  ctx.globalAlpha = pulse;
-  drawText(ctx, 'CLICK or press ENTER to sew again', VIEW.width / 2, 712, { size: 38, color: PALETTE.cream, outline: 8 });
-  ctx.globalAlpha = 1;
-  drawText(ctx, 'ESC  back to title', VIEW.width / 2, 764, { size: 22, color: PALETTE.gold, outline: 5 });
+  drawRestart(ctx, time, hover);
+}
+
+/** Where the results card's buttons sit. */
+export function resultsLayout() {
+  return {
+    again: { x: 400, y: 676, w: 480, h: 82 },
+    title: { x: 910, y: 690, w: 220, h: 56 },
+  };
+}
+
+/** The restart: one big PLAY AGAIN button, and a smaller way back to the title. */
+function drawRestart(ctx, time, hover) {
+  const { again, title } = resultsLayout();
+  const pulse = 1 + Math.sin(time * 4) * 0.025;
+  ctx.save();
+  ctx.translate(again.x + again.w / 2, again.y + again.h / 2);
+  ctx.scale(pulse, pulse);
+  drawFeltPanel(ctx, -again.w / 2, -again.h / 2, again.w, again.h, hover === 'again' ? PALETTE.terracotta : PALETTE.thread, 'rgba(246,236,214,0.85)', 18);
+  drawText(ctx, 'PLAY AGAIN  (R)', 0, 2, { size: 44, color: PALETTE.cream, outline: 7, font: FONT.plain });
+  ctx.restore();
+  drawFeltPanel(ctx, title.x, title.y, title.w, title.h, hover === 'title' ? PALETTE.thread : PALETTE.navy, 'rgba(246,236,214,0.6)', 14);
+  drawText(ctx, 'TITLE  (ESC)', title.x + title.w / 2, title.y + title.h / 2 + 1, { size: 24, color: PALETTE.cream, outline: 4, font: FONT.plain });
 }

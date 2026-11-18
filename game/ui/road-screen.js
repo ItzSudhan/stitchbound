@@ -1,11 +1,12 @@
 // The quilt road between nights: a map of patches joined by stitched paths. The patches you can
 // step to next pulse; the path you took is sewn in red thread. Pick with a click or keys 1-3.
+// The last notion draft sits in the corner, the card taken from it marked.
 import { FONT, PALETTE, VIEW } from '../core/config.js';
 import { modifierById } from '../world/modifiers.js';
 import { NODE_TYPES, roadLinks } from '../run/route-map.js';
 import { relicById } from '../items/relics.js';
 import { drawNeedleShape } from '../render/sprites.js';
-import { drawNodeIcon, drawRelicIcon, drawSequin } from '../render/icons.js';
+import { drawChoiceIcon, drawNodeIcon, drawRelicIcon, drawSequin } from '../render/icons.js';
 import { needleById } from '../meta/needles.js';
 import { dimScreen, drawFeltPanel, drawSpool, drawText } from './widgets.js';
 
@@ -34,7 +35,8 @@ export function visibleNodes(run) {
 export function drawRoad(ctx, run, view) {
   const { time, reachable, hover } = view;
   dimScreen(ctx, VIEW.width, VIEW.height, 0.45);
-  drawText(ctx, 'STITCHBOUND', 150, 42, { size: 34, color: PALETTE.cream, font: FONT.display, outline: 6, stitch: PALETTE.thread });
+  if (run.lastDraft) drawLastDraft(ctx, run.lastDraft);
+  else drawText(ctx, 'STITCHBOUND', 150, 42, { size: 34, color: PALETTE.cream, font: FONT.display, outline: 6, stitch: PALETTE.thread });
   drawText(ctx, 'THE QUILT ROAD', VIEW.width / 2, 52, { size: 52, color: PALETTE.gold, font: FONT.plain, outline: 8 });
   drawText(ctx, `Seed ${run.seed}  ·  click a glowing patch, or press 1, 2, 3`, VIEW.width / 2, 100, { size: 20, color: PALETTE.cream, outline: 4 });
   drawKitStrip(ctx, run);
@@ -101,6 +103,38 @@ export function drawRoad(ctx, run, view) {
   }
   drawNodeInfo(ctx, hover ?? reachable[0]);
   drawLegend(ctx, time, taken.length);
+}
+
+/** The last notion draft as three small cards, the one taken lifted and marked in gold. */
+function drawLastDraft(ctx, draft) {
+  drawFeltPanel(ctx, 12, 8, 360, 156, '#2b1f33', 'rgba(246,236,214,0.5)', 14);
+  drawText(ctx, `NIGHT ${draft.depth} DRAFT`, 192, 30, { size: 17, color: PALETTE.gold, outline: 0, font: FONT.plain });
+  const w = 104;
+  draft.choices.slice(0, 3).forEach((choice, i) => {
+    const x = 26 + i * (w + 10);
+    const taken = i === draft.picked;
+    const y = 48;
+    drawFeltPanel(ctx, x, y, w, 104, taken ? '#fff6e2' : 'rgba(239,224,192,0.7)', taken ? PALETTE.gold : choice.color, 10);
+    ctx.globalAlpha = taken ? 1 : 0.6;
+    drawChoiceIcon(ctx, choice, x + w / 2, y + 40, 52);
+    let size = 15;
+    ctx.font = `bold ${size}px ${FONT.plain}`;
+    const width = ctx.measureText(choice.name).width;
+    if (width > w - 8) size = Math.max(10, Math.floor((size * (w - 8)) / width));
+    drawText(ctx, choice.name, x + w / 2, y + 86, { size, color: PALETTE.ink, outline: 0, font: FONT.plain });
+    ctx.globalAlpha = 1;
+    if (taken) {
+      ctx.strokeStyle = PALETTE.gold;
+      ctx.lineWidth = 4;
+      ctx.strokeRect(x - 3, y - 3, w + 6, 110);
+      ctx.fillStyle = PALETTE.thread;
+      ctx.strokeStyle = PALETTE.ink;
+      ctx.lineWidth = 2;
+      ctx.fillRect(x + w - 50, y - 13, 60, 24);
+      ctx.strokeRect(x + w - 50, y - 13, 60, 24);
+      drawText(ctx, 'TAKEN', x + w - 20, y - 1, { size: 13, color: PALETTE.cream, outline: 0, font: FONT.plain });
+    }
+  });
 }
 
 function drawKitStrip(ctx, run) {

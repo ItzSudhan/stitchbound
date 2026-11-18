@@ -20,7 +20,7 @@ import { drawRoad, nodeRect, visibleNodes } from './ui/road-screen.js';
 import { cardRects, drawCards } from './ui/cards-screen.js';
 import { drawShop, shopLayout } from './ui/shop-screen.js';
 import { drawEvent, eventLayout } from './ui/event-screen.js';
-import { drawResults } from './ui/results-screen.js';
+import { drawResults, resultsLayout } from './ui/results-screen.js';
 import { drawPause } from './ui/pause-screen.js';
 import { CODEX_BACK, drawCodex } from './ui/codex-screen.js';
 import { createPilot, pilotChooseCard, pilotChooseNode, pilotChooseOption, pilotChooseWare, pilotIntent } from './demo/autopilot.js';
@@ -145,7 +145,7 @@ function finishRun() {
   state.summary = summarizeRun(run, previous, unlocked);
   setScreen('over');
   if (run.outcome === 'win') audio.play('win');
-  announce(`Run over. Score ${run.score}. Press Enter to sew again.`);
+  announce(`Run over. Score ${run.score}. Press R or Enter to play again.`);
 }
 
 function playerIntent(run) {
@@ -252,10 +252,13 @@ function handleMenus() {
       if (pick >= 0 && !chooseEventOption(run, event, pick)) audio.play('deny');
       break;
     }
-    case 'over':
-      if (input.anyPressed('Escape')) goToTitle();
-      else if ((confirm || m.clicked) && state.endTimer > 0.6) startRun();
+    case 'over': {
+      const layout = resultsLayout();
+      state.hover = inRect(m.x, m.y, layout.again) ? 'again' : inRect(m.x, m.y, layout.title) ? 'title' : null;
+      if (input.anyPressed('Escape') || (m.clicked && state.hover === 'title')) goToTitle();
+      else if ((confirm || input.anyPressed('KeyR') || m.clicked) && state.endTimer > 0.6) startRun();
       break;
+    }
     default:
       break;
   }
@@ -353,7 +356,7 @@ function render() {
       drawEvent(ctx, run, run.event, state.hover, t);
       break;
     case 'over':
-      drawResults(ctx, state.summary, t);
+      drawResults(ctx, state.summary, t, state.hover);
       break;
     default:
       if (!panels) drawHud(ctx, run, bestForMode(), t);

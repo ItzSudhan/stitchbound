@@ -120,9 +120,9 @@ try {
   check('the Sampler records pests met', (await chrome.evaluate('JSON.parse(localStorage.getItem("stitchbound.v2")).codex.pests.length')) > 0);
   check('run progress is saved', (await chrome.evaluate('JSON.parse(localStorage.getItem("stitchbound.v2")).progress.runs')) >= 1);
   await chrome.waitFor('window.__stitch.state.endTimer > 0.8');
-  await chrome.key('Enter');
+  await chrome.key('KeyR');
   await waitScreen('map');
-  check('Enter restarts after a loss', true);
+  check('R (PLAY AGAIN) restarts after a loss', true);
 
   await chrome.evaluate(`(async () => {
     const { takeNotion, gainRelic } = await import('./items/loadout.js');

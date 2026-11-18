@@ -152,6 +152,8 @@ export function takeOffer(run, index) {
   const choice = offer.choices[index];
   if (!choice) return 'cards';
   if (offer.kind === 'notion') {
+    // Kept for the road map, which shows the last draft and the card taken from it.
+    run.lastDraft = { depth: run.depth, choices: offer.choices, picked: index };
     takeNotion(run, choice.id);
     if (run.night && (run.night.elite || run.night.boss) && offerRelics(run, run.night.boss ? 'THE BOSS FALLS' : 'ELITE SPOILS', 'Choose a relic')) return 'cards';
   } else if (offer.kind === 'relic') gainRelic(run, choice.id);
