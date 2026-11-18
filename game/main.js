@@ -285,10 +285,13 @@ function handleMenus() {
       if (pick >= 0 && !chooseEventOption(run, event, pick)) audio.play('deny');
       break;
     }
-    case 'over':
+    case 'over': {
+      // In co-op, Enter is player two's fire key: a last tap must not skip the results card.
+      const again = run.partner ? input.anyPressed('KeyR') : confirm || input.anyPressed('KeyR');
       if (input.anyPressed('Escape')) goToTitle();
-      else if ((confirm || input.anyPressed('KeyR') || m.clicked) && state.endTimer > 0.6) startRun();
+      else if ((again || m.clicked) && state.endTimer > 0.6) startRun();
       break;
+    }
     default:
       break;
   }

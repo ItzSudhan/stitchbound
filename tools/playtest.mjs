@@ -89,7 +89,7 @@ try {
   check('the peddler opens', shop === 'shop');
   const before = await S('s.run.sequins');
   await chrome.key('Digit1');
-  await sleep(300);
+  await chrome.waitFor(`window.__stitch.state.run.sequins < ${before}`, 5000).catch(() => {});
   check('a key buys a ware with sequins', (await S('s.run.sequins')) < before, `${before} -> ${await S('s.run.sequins')}`);
   await chrome.key('Enter');
   await waitScreen('map');
@@ -227,6 +227,10 @@ try {
   await waitScreen('over');
   check('the co-op results card counts bound loops', (await S('s.summary.coop && s.summary.boundLoops > 0')) === true, `${await S('s.summary.boundLoops')}`);
   check('a Two Needles score is kept as its own best', (await chrome.evaluate('JSON.parse(localStorage.getItem("stitchbound.v2")).best["classic-duo"]')) > 0);
+  await chrome.waitFor('window.__stitch.state.endTimer > 0.8');
+  await chrome.key('Enter');
+  await sleep(400);
+  check("player two's Enter (fire) does not skip the co-op results card", (await S('s.screen')) === 'over');
 
   const relics = await chrome.evaluate(`(async () => {
     const { RELICS, draftRelics } = await import('./items/relics.js');

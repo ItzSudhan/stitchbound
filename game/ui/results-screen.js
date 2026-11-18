@@ -65,7 +65,7 @@ export function drawResults(ctx, summary, time) {
   }
   const pulse = 0.85 + 0.15 * Math.sin(time * 5);
   ctx.globalAlpha = pulse;
-  drawText(ctx, 'CLICK or press ENTER to sew again', VIEW.width / 2, 712, { size: 38, color: PALETTE.cream, outline: 8 });
+  drawText(ctx, summary.coop ? 'CLICK or press R to sew again' : 'CLICK or press ENTER to sew again', VIEW.width / 2, 712, { size: 38, color: PALETTE.cream, outline: 8 });
   ctx.globalAlpha = 1;
   drawText(ctx, 'ESC  back to title', VIEW.width / 2, 764, { size: 22, color: PALETTE.gold, outline: 5 });
 }
