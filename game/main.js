@@ -14,7 +14,7 @@ import { NEEDLES, isUnlocked } from './meta/needles.js';
 import { currentProgress, recordRunProgress } from './meta/progress.js';
 import { drawScene } from './render/scene.js';
 import { drawCursor, drawFieldOverlays, drawHud } from './ui/hud.js';
-import { FIELD_VIEW, drawFieldFrame, drawHudPanels } from './ui/hud-panels.js';
+import { drawHudStrips } from './ui/hud-strips.js';
 import { drawTitle, titleLayout } from './ui/title-screen.js';
 import { drawRoad, nodeRect, visibleNodes } from './ui/road-screen.js';
 import { cardRects, drawCards } from './ui/cards-screen.js';
@@ -151,13 +151,11 @@ function finishRun() {
 function playerIntent(run) {
   if (autopiloted()) return pilotIntent(run, state.pilot, STEP);
   const move = input.moveVector();
-  // With the side panels on, the field is drawn smaller: map the mouse into field coordinates.
-  const v = state.showPanels ? FIELD_VIEW : { x: 0, y: 0, s: 1 };
   return {
     moveX: move.x,
     moveY: move.y,
-    aimX: (input.mouse.x - v.x) / v.s,
-    aimY: (input.mouse.y - v.y) / v.s,
+    aimX: input.mouse.x,
+    aimY: input.mouse.y,
     fire: input.mouse.down || input.isHeld('KeyJ'),
     dash: input.anyPressed('Space', 'ShiftLeft', 'ShiftRight', 'MouseRight'),
   };
@@ -334,23 +332,12 @@ function render() {
   const run = state.run;
   const field = state.screen === 'play' || state.screen === 'pause' || (state.screen === 'cards' && run.inNight) || state.screen === 'over';
   const panels = field && state.showPanels;
+  drawScene(ctx, run, t, { needle: field });
   if (panels) {
-    // The night in its framed field, with the full HUD in panels around it.
-    const v = FIELD_VIEW;
-    ctx.fillStyle = '#20140e';
-    ctx.fillRect(0, 0, VIEW.width, VIEW.height);
-    ctx.save();
-    ctx.beginPath();
-    ctx.rect(v.x, v.y, v.w, v.h);
-    ctx.clip();
-    ctx.translate(v.x, v.y);
-    ctx.scale(v.s, v.s);
-    drawScene(ctx, run, t);
+    // The full HUD as slim translucent strips over the full-screen field.
     drawFieldOverlays(ctx, run, t);
-    ctx.restore();
-    drawFieldFrame(ctx);
-    drawHudPanels(ctx, run, bestForMode(), t);
-  } else drawScene(ctx, run, t, { needle: field });
+    drawHudStrips(ctx, run, bestForMode(), t);
+  }
   switch (state.screen) {
     case 'map':
       drawRoad(ctx, run, { reachable: nextNodes(run), hover: state.hover, time: t });

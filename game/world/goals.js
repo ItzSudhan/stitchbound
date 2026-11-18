@@ -11,7 +11,7 @@ export function createNightGoals(run, night) {
   run.goals = [
     { id: 'clear', text: night.boss ? `Defeat the ${night.name.replace('The ', '')}` : 'Stitch every pest', reward: 0 },
     { id: 'loops', text: `Close ${loops} loops`, target: loops, reward: 10 + night.depth },
-    { id: 'heirlooms', text: 'Keep 6 heirlooms whole', target: 6, reward: 8 + night.depth },
+    { id: 'heirlooms', text: 'Keep 6 heirlooms', target: 6, reward: 8 + night.depth },
   ];
 }
 

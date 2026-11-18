@@ -5,7 +5,44 @@ import { FONT, PALETTE } from '../core/config.js';
 import { TAU } from '../core/geometry.js';
 
 export function createEffects(seed) {
-  return { rng: createRandom(seed ^ 0x5eed), particles: [], rings: [], floaters: [], shake: 0, flash: 0, flashColor: '#ffffff', hitstop: 0 };
+  return { rng: createRandom(seed ^ 0x5eed), particles: [], rings: [], floaters: [], callouts: [], shake: 0, flash: 0, flashColor: '#ffffff', hitstop: 0 };
+}
+
+/** A big centre-field callout, like "STITCH x3!" or "CHAIN x5!", that pops in and fades. */
+export function addCallout(fx, text, color = PALETTE.gold) {
+  // A new callout replaces any of its kind ("CHAIN x5!" replaces "CHAIN x4!").
+  const kind = text.split(' ')[0];
+  fx.callouts = fx.callouts.filter((c) => c.text.split(' ')[0] !== kind);
+  fx.callouts.push({ text, color, age: 0, life: 1.5 });
+  if (fx.callouts.length > 2) fx.callouts.shift();
+}
+
+export function drawCallouts(ctx, fx, width) {
+  fx.callouts.forEach((c, i) => {
+    const t = c.age / c.life;
+    const pop = t < 0.12 ? 0.5 + (t / 0.12) * 0.7 : 1.2 - Math.min(0.2, (t - 0.12) * 0.6);
+    ctx.save();
+    ctx.globalAlpha = t > 0.75 ? (1 - t) / 0.25 : 1;
+    ctx.translate(width / 2, 640 - i * 92);
+    ctx.rotate(-0.04 + i * 0.05);
+    ctx.scale(pop, pop);
+    ctx.font = `bold 76px Verdana, "Segoe UI", Arial, sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.lineJoin = 'round';
+    ctx.lineWidth = 14;
+    ctx.strokeStyle = PALETTE.ink;
+    ctx.strokeText(c.text, 0, 0);
+    ctx.shadowColor = c.color;
+    ctx.shadowBlur = 24;
+    ctx.fillStyle = c.color;
+    ctx.fillText(c.text, 0, 0);
+    ctx.shadowBlur = 0;
+    ctx.lineWidth = 3;
+    ctx.strokeStyle = '#fff6d0';
+    ctx.strokeText(c.text, 0, -2);
+    ctx.restore();
+  });
 }
 
 /** A puff of particles: kind is 'fluff' (soft felt balls), 'fiber' (short threads) or 'spark' (stars). */
@@ -77,6 +114,8 @@ export function updateEffects(fx, dt) {
     f.y -= dt * 46;
   }
   fx.floaters = fx.floaters.filter((f) => f.age < f.life);
+  for (const c of fx.callouts) c.age += dt;
+  fx.callouts = fx.callouts.filter((c) => c.age < c.life);
 }
 
 /** The camera offset this frame from screen shake. */

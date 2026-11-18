@@ -11,7 +11,7 @@ import { updatePins, updateShots } from '../entities/projectiles.js';
 import { updatePickups } from '../entities/pickups.js';
 import { addBonus, updateCombo } from './scoring.js';
 import { PALETTE } from '../core/config.js';
-import { addShake, burst, floatText, hitStop, ring, screenFlash, updateEffects } from '../render/effects.js';
+import { addCallout, addShake, burst, floatText, hitStop, ring, screenFlash, updateEffects } from '../render/effects.js';
 import { distance, easeInCubic, pointInPolygon, polygonArea, polygonCentroid } from '../core/geometry.js';
 
 /** Advances the night by dt seconds under the player's intent {moveX, moveY, aimX, aimY, fire, dash}. */
@@ -84,6 +84,8 @@ export function cinchLoop(run, polygon) {
     ring(fx, centre.x, centre.y, PALETTE.goldDeep, reach, 0.5, 6);
   }
   const mended = mendInside(run.quilt, polygon, run.mods.mendAmount);
+  if (caught >= 2) addCallout(fx, `STITCH x${caught}!`, PALETTE.gold);
+  else if (run.quilt.lastMended >= 2) addCallout(fx, `MENDED x${run.quilt.lastMended}!`, '#7df0c8');
   run.stats.loops += 1;
   run.stats.mended += mended;
   run.stats.biggestLoop = Math.max(run.stats.biggestLoop, caught);

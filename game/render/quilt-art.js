@@ -225,12 +225,12 @@ export function drawStarShape(ctx, cx, cy, outer, inner) {
 function paintQuiltShade(ctx) {
   // Night falls on the quilt: a soft lavender dusk, so the creatures and thread read above the cloth.
   ctx.globalCompositeOperation = 'multiply';
-  ctx.fillStyle = '#c6c0da';
+  ctx.fillStyle = '#e2dcef';
   ctx.fillRect(0, 0, VIEW.width, VIEW.height);
   ctx.globalCompositeOperation = 'source-over';
-  const vignette = ctx.createRadialGradient(VIEW.width / 2, VIEW.height / 2, 260, VIEW.width / 2, VIEW.height / 2, 820);
+  const vignette = ctx.createRadialGradient(VIEW.width / 2, VIEW.height / 2, 320, VIEW.width / 2, VIEW.height / 2, 860);
   vignette.addColorStop(0, 'rgba(0,0,0,0)');
-  vignette.addColorStop(1, 'rgba(30,20,40,0.45)');
+  vignette.addColorStop(1, 'rgba(30,20,40,0.3)');
   ctx.fillStyle = vignette;
   ctx.fillRect(0, 0, VIEW.width, VIEW.height);
 }
