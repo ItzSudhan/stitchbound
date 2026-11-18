@@ -12,14 +12,17 @@ import { modifierById } from './modifiers.js';
 import { generateBoard } from './quilt-gen.js';
 import { addBonus, awardSequins } from '../run/scoring.js';
 
-const KIND_COST = { moth: 1, silverfish: 0.5, beetle: 2.5, spitter: 3, snipper: 2.5 };
-const KIND_FROM = { silverfish: 2, beetle: 3, spitter: 4, snipper: 5 };
+const KIND_COST = { moth: 1, silverfish: 0.5, beetle: 2.5, spitter: 3, snipper: 2.5, lintBall: 2.5, burrower: 2, carpetBeetle: 2.5 };
+const KIND_FROM = { silverfish: 2, beetle: 3, lintBall: 3, spitter: 4, burrower: 4, snipper: 5, carpetBeetle: 6 };
 const NIGHT_NAMES = {
   moth: ['First Flutter', 'Moth Flutter', 'Wingbeat Night', 'Dusty Night'],
   silverfish: ['Silverfish Skitter', 'Quicksilver Night', 'The Skittering'],
   beetle: ['Button Beetles', 'Clatter of Buttons', 'Beetle Stampede'],
   spitter: ['Pincushion Patrol', 'Night of Pins', 'The Bristling'],
   snipper: ['Snippers at the Seams', 'Scissor Night', 'The Unpicking'],
+  lintBall: ['Lint Storm', 'Fluff and Tumble'],
+  burrower: ['Undermined', 'The Burrowing'],
+  carpetBeetle: ['Seam Chewers', 'Carpet Night'],
 };
 const INTRO_SECONDS = 1.6;
 const CLEAR_SECONDS = 1.8;

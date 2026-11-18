@@ -6,6 +6,9 @@
 //   spitter    a walking pincushion that fires fans of pins
 // The Yarn Wyrm and the Moth Matriarch live in bosses.js. Every pest reads the night's scales.
 import { updateMatriarch, updateWyrmHead, updateWyrmSegment } from './bosses.js';
+import { splitLintBall, updateLintBall } from './lint-ball.js';
+import { updateBurrower } from './burrower.js';
+import { updateCarpetBeetle } from './carpet-beetle.js';
 import { spawnShot } from './projectiles.js';
 import { hurtPlayer } from './player.js';
 import { maybeDropSpool } from './pickups.js';
@@ -22,6 +25,9 @@ export const ENEMY_KINDS = {
   beetle: { hp: 48, r: 21, speed: 72, score: 220, sequins: 3, colors: ['#2b4166', '#6f8fb3', '#f6ecd6'] },
   snipper: { hp: 30, r: 16, speed: 150, score: 180, sequins: 2, colors: ['#7a3b2e', '#d9dde3'] },
   spitter: { hp: 60, r: 23, speed: 42, score: 260, sequins: 3, colors: ['#d6333f', '#94b283', '#f6ecd6'] },
+  lintBall: { hp: 32, r: 22, speed: 75, score: 90, sequins: 1, colors: ['#b9b4c4', '#f6ecd6'] },
+  burrower: { hp: 26, r: 13, speed: 160, score: 150, sequins: 2, colors: ['#c9a26b', '#7a5a32'] },
+  carpetBeetle: { hp: 44, r: 17, speed: 55, score: 200, sequins: 3, colors: ['#6b4226', '#e9c46a', '#f6ecd6'] },
   wyrm: { hp: 650, r: 27, speed: 150, score: 2000, sequins: 25, colors: ['#e07a5f', '#f4a7a1', '#f6ecd6'] },
   wyrmSegment: { hp: 70, r: 21, speed: 0, score: 120, sequins: 1, colors: ['#e07a5f', '#f2cc8f'] },
   matriarch: { hp: 9000, r: 72, speed: 70, score: 10000, sequins: 40, colors: ['#5e4170', '#9c7bb0', '#f5c542', '#f6ecd6'] },
@@ -33,6 +39,9 @@ const BEHAVIOURS = {
   beetle: updateBeetle,
   snipper: updateSnipper,
   spitter: updateSpitter,
+  lintBall: updateLintBall,
+  burrower: updateBurrower,
+  carpetBeetle: updateCarpetBeetle,
   wyrm: updateWyrmHead,
   wyrmSegment: updateWyrmSegment,
   matriarch: updateMatriarch,
@@ -72,6 +81,15 @@ export function spawnEnemy(run, kind, x, y, extra = {}) {
     age: 0,
     ...extra,
   };
+  // Elite nights: some pests come as elites, bigger, twice as tough, worth twice as much.
+  const ordinary = !big && kind !== 'wyrm' && kind !== 'wyrmSegment' && !extra.guard && extra.gen === undefined;
+  if (ordinary && night.elite && run.rng.chance(0.35)) {
+    enemy.elite = true;
+    enemy.r *= 1.25;
+    enemy.hp *= 2.2;
+    enemy.maxHp *= 2.2;
+    enemy.score *= 2;
+  }
   run.enemies.push(enemy);
   run.seen.pests.add(kind);
   return enemy;
@@ -97,6 +115,8 @@ export function updateEnemies(run, dt) {
     enemy.age += dt;
     enemy.flash = Math.max(0, enemy.flash - dt * 6);
     BEHAVIOURS[enemy.kind](run, enemy, dt);
+    // A pest that wanders far off the quilt is gone for good, so a night can always end.
+    if (enemy.x < -200 || enemy.y < -200 || enemy.x > VIEW.width + 200 || enemy.y > VIEW.height + 200) enemy.dead = true;
     const p = run.player;
     if (!enemy.passive && distance(enemy.x, enemy.y, p.x, p.y) < enemy.r + 12) hurtPlayer(run, 1);
   }
@@ -136,7 +156,8 @@ export function killEnemy(run, enemy, source) {
   ring(run.fx, enemy.x, enemy.y, def.colors[0], enemy.r * 3, 0.45, 5);
   addShake(run.fx, big ? 26 : 3);
   registerKill(run, enemy, source);
-  awardSequins(run, def.sequins * run.night.sequinScale, enemy.x, enemy.y + 14, big);
+  awardSequins(run, def.sequins * run.night.sequinScale * (enemy.elite ? 2 : 1), enemy.x, enemy.y + 14, big);
+  if (enemy.kind === 'lintBall') splitLintBall(run, enemy);
   maybeDropSpool(run, enemy);
   run.events.push({ type: big ? 'bossDie' : 'kill', kind: enemy.kind });
   if (enemy.kind === 'wyrm') {

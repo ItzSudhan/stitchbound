@@ -82,7 +82,7 @@ export function pilotIntent(run, pilot, dt) {
   let aimY = ty;
   let nearest = Infinity;
   for (const e of run.enemies) {
-    if (e.dead) continue;
+    if (e.dead || e.buried) continue;
     const d = distance(p.x, p.y, e.x, e.y);
     if (d < nearest) {
       nearest = d;

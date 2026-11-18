@@ -6,6 +6,9 @@ import { TAU } from '../core/geometry.js';
 import { drawQuilt } from './quilt-art.js';
 import { drawCandles, drawFrayedPatches } from './patch-art.js';
 import { drawDarkness } from './darkness.js';
+import { drawLintBall } from '../entities/lint-ball.js';
+import { drawBurrower } from '../entities/burrower.js';
+import { drawCarpetBeetle } from '../entities/carpet-beetle.js';
 import { cinchShape } from '../run/night.js';
 import { buttonPositions } from '../entities/player.js';
 import { spoolTimeLeft } from '../entities/pickups.js';
@@ -92,7 +95,25 @@ function drawNightShade(ctx, run) {
 }
 
 function drawEnemy(ctx, enemy, time) {
+  if (enemy.elite) {
+    ctx.strokeStyle = PALETTE.gold;
+    ctx.lineWidth = 4;
+    ctx.setLineDash([6, 4]);
+    ctx.beginPath();
+    ctx.arc(enemy.x, enemy.y, enemy.r * 1.6 + Math.sin(time * 6) * 2, 0, TAU);
+    ctx.stroke();
+    ctx.setLineDash([]);
+  }
   switch (enemy.kind) {
+    case 'lintBall':
+      drawLintBall(ctx, enemy, time);
+      break;
+    case 'burrower':
+      drawBurrower(ctx, enemy, time);
+      break;
+    case 'carpetBeetle':
+      drawCarpetBeetle(ctx, enemy, time);
+      break;
     case 'moth':
       drawMoth(ctx, enemy, time);
       break;
