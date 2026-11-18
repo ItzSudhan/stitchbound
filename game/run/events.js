@@ -7,7 +7,7 @@ import { draftRelics } from '../items/relics.js';
 import { gainRelic, refreshLoadout, takeNotion } from '../items/loadout.js';
 
 function randomRelic(run, rng) {
-  const [relic] = draftRelics(rng, run.relics, 1);
+  const [relic] = draftRelics(rng, run.relics, 1, run.coop);
   if (!relic) {
     run.sequins += 40;
     return 'Nothing left to find: +40 sequins instead.';

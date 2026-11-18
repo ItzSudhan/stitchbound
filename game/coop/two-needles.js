@@ -11,8 +11,8 @@ import { createThread } from '../world/thread.js';
 /** The partner's thread and needle colours. */
 export const PARTNER = { thread: '#2f8fe0', threadLight: '#bfe3ff', needle: '#f5c542', name: 'Gold Needle' };
 
-/** How much harder a bound loop pulls than a single needle's loop. */
-export const BOUND_POWER = 2;
+// How much harder a bound loop pulls than a single needle's loop is mods.boundPower: 2, or 3 with
+// the Cat's Cradle relic (items/relics.js). Love Knot and Cradle Song add to it too.
 
 const MIN_BOUND_AREA = 4200;
 /** The partner's newest segments sit under its needle and never count as a crossing. */

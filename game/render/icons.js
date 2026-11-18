@@ -300,6 +300,39 @@ function drawGlyph(ctx, id) {
       ctx.quadraticCurveTo(8, -24, 2, -30);
       ctx.stroke();
       break;
+    case 'catsCradle':
+      // A string figure: red and blue thread crossed between two pairs of fingers.
+      ctx.lineWidth = 5;
+      for (const [color, flip] of [[PALETTE.thread, 1], ['#2f8fe0', -1]]) {
+        ctx.strokeStyle = color;
+        ctx.beginPath();
+        ctx.moveTo(-22, -16 * flip);
+        ctx.lineTo(22, 16 * flip);
+        ctx.moveTo(-22, 16 * flip);
+        ctx.lineTo(0, 0);
+        ctx.moveTo(-22, -16 * flip);
+        ctx.lineTo(22, -16 * flip);
+        ctx.stroke();
+      }
+      ctx.fillStyle = '#f2c9a0';
+      for (const [x, y] of [[-24, -18], [-24, 18], [24, -18], [24, 18]]) {
+        ctx.beginPath();
+        ctx.arc(x, y, 6, 0, TAU);
+        inked(ctx, '#f2c9a0', 2.5);
+      }
+      break;
+    case 'loveKnot':
+      ctx.beginPath();
+      ctx.moveTo(0, 18);
+      ctx.bezierCurveTo(-30, -2, -18, -26, 0, -10);
+      ctx.bezierCurveTo(18, -26, 30, -2, 0, 18);
+      inked(ctx, '#e0607a', 3);
+      ctx.strokeStyle = '#2f8fe0';
+      ctx.lineWidth = 4;
+      ctx.beginPath();
+      ctx.ellipse(0, 0, 26, 9, -0.5, 0, TAU);
+      ctx.stroke();
+      break;
     case 'book':
       ctx.beginPath();
       ctx.rect(-22, -16, 44, 32);

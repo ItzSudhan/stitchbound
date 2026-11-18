@@ -226,6 +226,39 @@ try {
   await hook('fastForward(3, "over")');
   await waitScreen('over');
   check('the co-op results card counts bound loops', (await S('s.summary.coop && s.summary.boundLoops > 0')) === true, `${await S('s.summary.boundLoops')}`);
+  check('a Two Needles score is kept as its own best', (await chrome.evaluate('JSON.parse(localStorage.getItem("stitchbound.v2")).best["classic-duo"]')) > 0);
+
+  const relics = await chrome.evaluate(`(async () => {
+    const { RELICS, draftRelics } = await import('./items/relics.js');
+    const { createRandom } = await import('./core/random.js');
+    const { createRun, enterNode, nextNodes } = await import('./run/run.js');
+    const { cinchLoop } = await import('./run/night.js');
+    const { gainRelic } = await import('./items/loadout.js');
+    const { spawnEnemy } = await import('./entities/enemies.js');
+    const solo = draftRelics(createRandom(1), [], RELICS.length).map((r) => r.id);
+    const duo = draftRelics(createRandom(1), [], RELICS.length, true).map((r) => r.id);
+    // Cat's Cradle and Love Knot on a bound loop round three beetles, with a spool missing.
+    const run = createRun({ seed: 4, coop: true });
+    enterNode(run, nextNodes(run)[0]);
+    run.enemies = [];
+    run.spawnQueue = [];
+    gainRelic(run, 'catsCradle');
+    gainRelic(run, 'loveKnot');
+    const beetles = [0, 1, 2].map((i) => { const b = spawnEnemy(run, 'beetle', 600 + i * 40, 400); b.hp = 100000; return b; });
+    run.player.hp = run.mods.hp - 1;
+    const square = [{ x: 500, y: 300 }, { x: 800, y: 300 }, { x: 800, y: 500 }, { x: 500, y: 500 }];
+    cinchLoop(run, square, run.mods.boundPower);
+    return {
+      soloHasCoop: solo.includes('catsCradle') || solo.includes('loveKnot'),
+      duoHasCoop: duo.includes('catsCradle') && duo.includes('loveKnot'),
+      hit: 100000 - beetles[0].hp,
+      loopDamage: run.mods.loopDamage,
+      healed: run.player.hp === run.mods.hp,
+    };
+  })()`);
+  check('the co-op relics are only drafted in Two Needles runs', !relics.soloHasCoop && relics.duoHasCoop);
+  check("Cat's Cradle makes a bound loop pull 3x", relics.hit === relics.loopDamage * 3, `${relics.hit} vs loop ${relics.loopDamage}`);
+  check('Love Knot heals a spool when a bound loop holds 3 pests', relics.healed === true);
   await chrome.key('Escape');
   await waitScreen('title');
   await chrome.key('Digit2');

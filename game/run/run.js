@@ -78,7 +78,7 @@ export function createRun({ seed, modeId = 'classic', needleId = 'steel', coop =
   run.player = createPlayer(run.mods);
   run.thread = createThread(run.player.x, run.player.y);
   if (coop) addPartner(run);
-  if (needleById(needleId).startRelic) gainRelic(run, draftRelics(run.rng, [], 1)[0].id);
+  if (needleById(needleId).startRelic) gainRelic(run, draftRelics(run.rng, [], 1, coop)[0].id);
   return run;
 }
 
@@ -130,7 +130,7 @@ export function offerNotions(run) {
 }
 
 function offerRelics(run, title, subtitle) {
-  const choices = draftRelics(run.rng, run.relics, 3).map((r) => ({
+  const choices = draftRelics(run.rng, run.relics, 3, run.coop).map((r) => ({
     kind: 'relic',
     id: r.id,
     name: r.name,

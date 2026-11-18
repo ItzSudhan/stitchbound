@@ -13,7 +13,7 @@ import { addBonus, updateCombo } from './scoring.js';
 import { PALETTE } from '../core/config.js';
 import { addShake, burst, floatText, hitStop, ring, screenFlash, updateEffects } from '../render/effects.js';
 import { distance, easeInCubic, pointInPolygon, polygonArea, polygonCentroid } from '../core/geometry.js';
-import { BOUND_POWER, findBoundLoop, spendBothThreads } from '../coop/two-needles.js';
+import { findBoundLoop, spendBothThreads } from '../coop/two-needles.js';
 
 const STILL = { moveX: 0, moveY: 0, aimX: 640, aimY: 400, fire: false, dash: false };
 
@@ -96,14 +96,15 @@ function sewTogether(run) {
     const bound = findBoundLoop(mine, theirs);
     if (bound) {
       spendBothThreads(run);
-      cinchLoop(run, bound, BOUND_POWER);
+      cinchLoop(run, bound, run.mods.boundPower);
     }
   }
 }
 
 /**
  * A closed loop pulls tight: everything inside takes the cinch, holes inside are darned shut.
- * `power` is 1 for one needle's loop and BOUND_POWER for a bound loop pulled by two.
+ * `power` is 1 for one needle's loop and mods.boundPower (2, or 3 with Cat's Cradle) for a bound
+ * loop pulled by two.
  */
 export function cinchLoop(run, polygon, power = 1) {
   const fx = run.fx;
@@ -118,11 +119,13 @@ export function cinchLoop(run, polygon, power = 1) {
     damageEnemy(run, enemy, damage, 'loop');
     burst(fx, enemy.x, enemy.y, { count: 8, colors: [PALETTE.thread, PALETTE.gold], speed: 180, size: 6, kind: 'spark' });
   }
-  // Quilting Hoop: the cinch sends a shockwave through the pests around it.
-  if (run.mods.hoopWave > 0) {
+  // Quilting Hoop (any loop) and Cradle Song (bound loops): the cinch sends a shockwave through
+  // the pests around it.
+  const wave = run.mods.hoopWave + (bound ? run.mods.boundWave : 0);
+  if (wave > 0) {
     const reach = 140 + Math.sqrt(area) * 0.5;
     for (const enemy of run.enemies) {
-      if (!enemy.dead && distance(enemy.x, enemy.y, centre.x, centre.y) < reach) damageEnemy(run, enemy, run.mods.hoopWave, 'hoop');
+      if (!enemy.dead && distance(enemy.x, enemy.y, centre.x, centre.y) < reach) damageEnemy(run, enemy, wave, 'hoop');
     }
     ring(fx, centre.x, centre.y, PALETTE.goldDeep, reach, 0.5, 6);
   }
@@ -149,6 +152,11 @@ export function cinchLoop(run, polygon, power = 1) {
     if (run.mods.loopHeal && caught >= 3 && run.player.hp < run.mods.hp) {
       run.player.hp += 1;
       floatText(fx, run.player.x, run.player.y - 40, '+1 SPOOL', PALETTE.threadLight, 24);
+    }
+    // Love Knot (co-op): a bound loop that holds three or more pests ties a spool back on.
+    if (bound && run.mods.boundHeal && caught >= 3 && run.player.hp < run.mods.hp) {
+      run.player.hp += 1;
+      floatText(fx, centre.x, centre.y + 30, 'LOVE KNOT +1 SPOOL', '#ff9fb2', 24);
     }
   } else if (mended > 0.05) {
     floatText(fx, centre.x, centre.y, bound ? 'BOUND & MENDED' : 'MENDED', PALETTE.gold, 26);

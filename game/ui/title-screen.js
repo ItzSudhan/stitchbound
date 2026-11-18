@@ -51,7 +51,7 @@ export function drawTitle(ctx, view) {
   drawText(ctx, modeGoal(mode), VIEW.width / 2, 197, { size: 33, color: PALETTE.gold, outline: 0, font: FONT.plain });
   drawMenu(ctx, view, mode);
   drawBoss(ctx, time);
-  drawBest(ctx, mode, view.best);
+  drawBest(ctx, mode, view.best, view.coop);
   drawControls(ctx, view.coop);
 }
 
@@ -166,9 +166,9 @@ function drawBoss(ctx, time) {
   drawText(ctx, 'NIGHT 10 BOSS', 935, 614, { size: 26, color: PALETTE.cream, outline: 4, font: FONT.plain });
 }
 
-function drawBest(ctx, mode, best) {
-  drawFeltPanel(ctx, 1000, 250, 250, 104, PALETTE.cream, 'rgba(42,29,26,0.45)', 16);
-  drawText(ctx, `BEST ${mode.daily ? 'TODAY' : mode.name.toUpperCase()}`, 1125, 278, { size: 18, color: PALETTE.terracotta, outline: 0, font: FONT.plain });
+function drawBest(ctx, mode, best, coop) {
+  drawFeltPanel(ctx, 1000, 250, 250, 104, coop ? '#dcebf7' : PALETTE.cream, 'rgba(42,29,26,0.45)', 16);
+  drawText(ctx, `BEST ${mode.daily ? 'TODAY' : mode.name.toUpperCase()}${coop ? ' DUO' : ''}`, 1125, 278, { size: 18, color: PALETTE.terracotta, outline: 0, font: FONT.plain });
   drawText(ctx, formatNumber(best), 1125, 322, { size: best >= 100000 ? 40 : 46, color: PALETTE.ink, outline: 0, font: FONT.plain });
 }
 

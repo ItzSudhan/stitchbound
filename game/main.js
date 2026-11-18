@@ -91,9 +91,15 @@ function currentMode() {
   return MODES[state.modeIndex];
 }
 
+/** Where a mode's best is kept: Two Needles pairs keep a best of their own ("classic-duo"). */
+function scoreKey(modeId, coop) {
+  return coop ? `${modeId}-duo` : modeId;
+}
+
 function bestForMode() {
   const mode = currentMode();
-  return bestScore(mode.id, mode.daily ? seedForMode(mode, null).toString() : null);
+  const day = mode.daily ? `${seedForMode(mode, null)}${state.coop ? '-duo' : ''}` : null;
+  return bestScore(scoreKey(mode.id, state.coop), day);
 }
 
 function startDemo() {
@@ -142,9 +148,10 @@ function goToNode(node) {
 function finishRun() {
   const run = state.run;
   const mode = modeById(run.modeId);
-  const dayKey = mode.daily ? String(run.seed) : null;
-  const previous = bestScore(mode.id, dayKey);
-  recordScore(mode.id, run.score, dayKey);
+  const coop = Boolean(run.partner);
+  const dayKey = mode.daily ? `${run.seed}${coop ? '-duo' : ''}` : null;
+  const previous = bestScore(scoreKey(mode.id, coop), dayKey);
+  recordScore(scoreKey(mode.id, coop), run.score, dayKey);
   const unlocked = recordRunProgress(run);
   state.progress = currentProgress();
   state.summary = summarizeRun(run, previous, unlocked);
@@ -423,7 +430,7 @@ function stage(name) {
   if (scene.screen === 'title') state.demoRun = scene.run;
   else state.run = scene.run;
   if (scene.summary) state.summary = scene.summary;
-  if (scene.best) recordScore(currentMode().id, scene.best);
+  if (scene.best) recordScore(scoreKey(currentMode().id, state.coop), scene.best);
   render();
   render();
   if (scene.caption) drawCaption(ctx, scene.caption, VIEW.width);

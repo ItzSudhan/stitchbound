@@ -85,8 +85,8 @@ export function drawCodex(ctx, time, hover) {
   drawFeltPanel(ctx, 40, 432, 640, 280, PALETTE.cream, 'rgba(42,29,26,0.45)', 18);
   drawText(ctx, 'RELICS', 360, 456, { size: 22, color: PALETTE.thread, outline: 0 });
   RELICS.forEach((relic, i) => {
-    const x = 96 + (i % 7) * 88;
-    const y = 520 + Math.floor(i / 7) * 110;
+    const x = 90 + (i % 8) * 78;
+    const y = 520 + Math.floor(i / 8) * 110;
     const known = codex.relics.includes(relic.id);
     maybeSilhouette(ctx, known, () => drawRelicIcon(ctx, relic, x, y, 56));
     drawText(ctx, known ? relic.name.split(' ').pop() : '???', x, y + 44, { size: 14, color: PALETTE.ink, outline: 0 });

@@ -14,6 +14,7 @@ export const SYNERGIES = [
   { id: 'buttonFortress', name: 'Button Fortress', text: '+2 guard buttons', needs: { notions: { buttons: 1 }, relics: ['ironThimble'] }, apply: (m) => { m.buttons += 2; } },
   { id: 'longHaul', name: 'Long Haul', text: 'Loops cinch 30% harder and darn 50% more', needs: { notions: { spool: 2 }, relics: ['tapeMeasure'] }, apply: (m) => { m.loopDamage *= 1.3; m.mendAmount *= 1.5; } },
   { id: 'tightWeave', name: 'Tight Weave', text: 'Cinch shockwaves hit twice as hard', needs: { notions: { wax: 1 }, relics: ['hoop'] }, apply: (m) => { m.hoopWave *= 2; } },
+  { id: 'cradleSong', name: 'Cradle Song', text: 'Co-op: every bound loop sends out a shockwave', needs: { notions: { wax: 1 }, relics: ['catsCradle'] }, apply: (m) => { m.boundWave += 60; } },
 ];
 
 export function synergyById(id) {

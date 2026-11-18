@@ -13,7 +13,7 @@ export function stockMerchant(run, node) {
   for (const notion of draftNotions(rng, run.owned, 3)) {
     items.push({ kind: 'notion', id: notion.id, name: notion.name, text: notion.text, color: notion.color, price: 28 + 10 * (run.owned[notion.id] ?? 0) + rng.int(0, 6) });
   }
-  for (const relic of draftRelics(rng, run.relics, 2)) {
+  for (const relic of draftRelics(rng, run.relics, 2, run.coop)) {
     items.push({ kind: 'relic', id: relic.id, name: relic.name, text: relic.text, color: relic.color, price: 70 + rng.int(0, 15) });
   }
   items.push({ kind: 'spool', id: 'spool', name: 'Spare Spool', text: 'Heal 1 spool', color: '#d6333f', price: 18 });

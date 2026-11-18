@@ -55,6 +55,10 @@ export const PLAYER_BASE = {
   heirloomBonus: 1,
   restHeal: 2,
   lightRadius: 1,
+  // Two Needles: how hard a bound loop pulls, and what the co-op relics add to it.
+  boundPower: 2,
+  boundHeal: false,
+  boundWave: 0,
 };
 
 /** Combo: kills within this many seconds of each other raise the score multiplier. */

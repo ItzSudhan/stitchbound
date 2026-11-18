@@ -16,6 +16,9 @@ export const RELICS = [
   { id: 'locket', name: 'Heirloom Locket', text: 'Heirloom bonuses are doubled', color: '#7a3a68', apply: (m) => { m.heirloomBonus *= 2; } },
   { id: 'crookedPin', name: 'Crooked Pin', text: '+12% chance of a critical pin', color: '#9c7bb0', apply: (m) => { m.critChance += 0.12; } },
   { id: 'teaTin', name: 'Tin of Tea', text: '+1 max spool; rests heal 1 more', color: '#94b283', apply: (m) => { m.hp += 1; m.restHeal += 1; } },
+  // Two Needles relics: only found in co-op runs, they change the bound loop (coop/two-needles.js).
+  { id: 'catsCradle', name: "Cat's Cradle", text: 'Co-op: bound loops pull 3x, not 2x', color: '#2f8fe0', coop: true, apply: (m) => { m.boundPower = 3; } },
+  { id: 'loveKnot', name: 'Love Knot', text: 'Co-op: a bound loop holding 3+ pests heals a spool', color: '#e0607a', coop: true, apply: (m) => { m.boundHeal = true; } },
 ];
 
 const BY_ID = new Map(RELICS.map((r) => [r.id, r]));
@@ -24,9 +27,9 @@ export function relicById(id) {
   return BY_ID.get(id);
 }
 
-/** Up to `count` relics the player does not own yet. */
-export function draftRelics(rng, owned, count = 3) {
-  const pool = RELICS.filter((r) => !owned.includes(r.id));
+/** Up to `count` relics the player does not own yet; the co-op relics only in a Two Needles run. */
+export function draftRelics(rng, owned, count = 3, coop = false) {
+  const pool = RELICS.filter((r) => !owned.includes(r.id) && (coop || !r.coop));
   const picks = [];
   while (picks.length < count && pool.length > 0) picks.push(pool.splice(Math.floor(rng.next() * pool.length), 1)[0]);
   return picks;

@@ -66,6 +66,8 @@ function coopScore(run) {
   }
   // Best of all: the Matriarch herself inside the bound loop; else any boss in view, else pests.
   const boss = run.enemies.find((e) => (e.kind === 'matriarch' || e.kind === 'wyrm') && !e.dead && !e.entering && e.x > 120 && e.x < 1160 && e.y > 170 && e.y < 620);
+  // A boss mid hit-flash is a white blank: wait for her colours.
+  if (boss && boss.flash > 0.3) return -1;
   const holdsBoss = boss && pointInPolygon(boss.x, boss.y, fresh.polygon) ? 260 : 0;
   const bossBonus = boss ? (boss.kind === 'matriarch' ? 200 : 120) : 0;
   const apart = distance(run.player.x, run.player.y, run.partner.x, run.partner.y);
