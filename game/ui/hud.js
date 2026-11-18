@@ -140,12 +140,13 @@ function drawBossBar(ctx, run) {
 /** The run's kit along the bottom: relic rosettes, then notion badges with their levels. */
 function drawKit(ctx, run) {
   const ids = Object.keys(run.owned);
-  const size = 32;
-  const gap = 5;
   const count = run.relics.length + ids.length;
   if (count === 0) return;
+  // Shrink the badges so the row always fits between the quilt and needle panels.
+  const gap = 4;
+  const size = Math.min(32, Math.floor(466 / count) - gap);
   const total = count * (size + gap) - gap;
-  let x = VIEW.width / 2 + 40 - total / 2 + size / 2;
+  let x = 462 + (466 - total) / 2 + size / 2;
   const y = VIEW.height - 36;
   for (const id of run.relics) {
     drawRelicIcon(ctx, relicById(id), x, y - 4, size);
