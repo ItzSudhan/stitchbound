@@ -14,9 +14,9 @@ Press 2 on the title (or click TWO NEEDLES) and a second player joins at the sam
 
 | | Player one (red thread) | Player two (blue thread) |
 |---|---|---|
-| Move | WASD | Arrow keys |
-| Fire pins | Mouse (hold click) | Enter (aims at the nearest pest ahead) |
-| Snip-dash | Space | Right Shift or / |
+| Move | WASD | Arrow keys, or a gamepad's left stick or d-pad |
+| Fire pins | Mouse (hold click) | Enter, or A / RT (aims at the nearest pest ahead) |
+| Snip-dash | Space | Right Shift or /, or B / RB |
 
 Each needle still closes loops on its own thread. The new move is the **bound loop**: when a needle crosses its partner's thread a second time, the stretch of each thread between the two crossings closes into one loop, red on one side and blue on the other. Two hands pull it tight, so a bound loop does **double** cinch damage (even against the Matriarch), darns **double** the cloth and scores double, and both threads are spent. The pair's best tactic is the pincer: circle the same knot of pests the opposite way round from each other, and every time your paths cross on the far side the whole knot is bound inside.
 
@@ -24,7 +24,7 @@ The two needles share everything else: the spools of health, the sewing box (not
 
 Co-op runs also draft two relics that solo runs never see: **Cat's Cradle** (bound loops pull 3x instead of 2x) and **Love Knot** (a bound loop that holds three or more pests ties a spool back on). Cat's Cradle with the Waxed Thread notion completes the co-op synergy **Cradle Song**: every bound loop sends out a shockwave.
 
-The code lives in `game/coop/`: `two-needles.js` (the second needle, the bound-loop rule and shared targeting), `partner-input.js` (player two's keys) and `partner-pilot.js` (the pincer autopilot behind the co-op attract mode, `?demo=1&coop=1` and the co-op screenshot). The play-test (`node tools/playtest.mjs`) switches co-op on from the title, drives player two with the real arrow keys and Enter, and checks that two needles circling a beetle bind it in one loop that does exactly double damage, while one needle on the same path binds nothing; that the co-op relics are drafted only in co-op and do what they say; and that a co-op score is kept as its own best. `node tools/fuzz.mjs 400 coop` mashes keys through co-op runs and `node tools/balance.mjs 1,2,3 mortal classic steel coop` plays whole co-op runs with the pincer pilot.
+The code lives in `game/coop/`: `two-needles.js` (the second needle, the bound-loop rule and shared targeting), `partner-input.js` (player two's keys and gamepad) and `partner-pilot.js` (the pincer autopilot behind the co-op attract mode, `?demo=1&coop=1` and the co-op screenshot). The play-test (`node tools/playtest.mjs`) switches co-op on from the title, drives player two with the real arrow keys and Enter and then with a virtual gamepad, and checks that two needles circling a beetle bind it in one loop that does exactly double damage, while one needle on the same path binds nothing; that the co-op relics are drafted only in co-op and do what they say; and that a co-op score is kept as its own best. `node tools/fuzz.mjs 400 coop` mashes keys through co-op runs and `node tools/balance.mjs 1,2,3 mortal classic steel coop` plays whole co-op runs with the pincer pilot.
 
 ## Run it
 

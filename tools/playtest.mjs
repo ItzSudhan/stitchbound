@@ -171,6 +171,17 @@ try {
   check('player two lays a blue thread of its own', (await S('s.run.partnerThread.points.length')) > 5);
   check('Enter in a night does not leave the night', (await S('s.screen')) === 'play');
 
+  // A virtual gamepad for player two: left stick pushed up, A held.
+  const padY = await S('s.run.partner.y');
+  await chrome.evaluate(`Object.defineProperty(navigator, 'getGamepads', { configurable: true, value: () => [{
+    connected: true, axes: [0, -1, 0, 0],
+    buttons: Array.from({ length: 17 }, (_, i) => ({ pressed: i === 0, value: i === 0 ? 1 : 0 })),
+  }] })`);
+  await chrome.waitFor(`window.__stitch.state.run.partner.y < ${padY - 60}`, 10000).catch(() => {});
+  const padPins = await S('s.run.pins.length');
+  await chrome.evaluate(`Object.defineProperty(navigator, 'getGamepads', { configurable: true, value: () => [] })`);
+  check('a gamepad steers player two (left stick) and fires (A)', padY - (await S('s.run.partner.y')) > 60 && padPins > 0, `y ${Math.round(padY)} -> ${Math.round(await S('s.run.partner.y'))}, ${padPins} pins`);
+
   const bound = await chrome.evaluate(`(async () => {
     const { createRun, enterNode, nextNodes } = await import('./run/run.js');
     const { stepNight } = await import('./run/night.js');
