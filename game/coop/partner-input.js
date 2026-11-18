@@ -1,4 +1,4 @@
-// Player two's keys on the shared keyboard: the arrow keys steer the Gold Needle, Enter fires
+// Player two's keys on the shared keyboard: the arrow keys steer the Brass Needle, Enter fires
 // pins (aimed at the nearest pest ahead, since player one has the mouse) and Right Shift or the
 // slash key dashes. Player one keeps WASD, the mouse and Space.
 import { partnerAim } from './two-needles.js';

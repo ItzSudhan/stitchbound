@@ -10,7 +10,7 @@ Controls: WASD to move, mouse to aim, hold click to fire pins, Space to snip-das
 
 ## Two Needles: local co-op
 
-Press 2 on the title (or click TWO NEEDLES) and a second player joins at the same keyboard with the Gold Needle and a **blue thread**:
+Press 2 on the title (or click TWO NEEDLES) and a second player joins at the same keyboard with the Brass Needle and a **blue thread**:
 
 | | Player one (red thread) | Player two (blue thread) |
 |---|---|---|

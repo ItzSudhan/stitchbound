@@ -161,7 +161,7 @@ export function cinchLoop(run, polygon, power = 1) {
   } else if (mended > 0.05) {
     floatText(fx, centre.x, centre.y, bound ? 'BOUND & MENDED' : 'MENDED', PALETTE.gold, 26);
   } else if (bound) {
-    floatText(fx, centre.x, centre.y, 'BOUND LOOP', '#bfe3ff', 26);
+    floatText(fx, centre.x, centre.y, 'BOUND LOOP!', '#bfe3ff', 34);
   }
   run.events.push({ type: 'cinch', caught, mended, bound });
 }

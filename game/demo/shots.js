@@ -58,7 +58,8 @@ function coverScore(run) {
 /** The co-op shot: a fresh bound loop, the bigger and the more it holds the better, the Matriarch inside. */
 function coopScore(run) {
   if (!run.partner) return -1;
-  const fresh = run.cinches.find((c) => c.bound && c.age > 0.02 && c.age < 0.16);
+  // A bound cinch lasts half a second; past 0.3 s it has shrunk too far to read.
+  const fresh = run.cinches.find((c) => c.bound && c.age > 0.02 && c.age < 0.3);
   if (!fresh) return -1;
   if (run.fx.flash > 0.12) return -1;
   for (const n of [run.player, run.partner]) {

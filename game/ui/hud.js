@@ -176,7 +176,9 @@ function drawKit(ctx, run) {
 /** Teaching tips on the first nights: shown until the player has done the thing they teach. */
 function drawTip(ctx, run, time) {
   let tip = null;
-  if (run.depth === 1 && run.stats.loops === 0 && run.waveTime > 2.5) tip = 'Circle the moths: cross your own thread to close a loop!';
+  // Two Needles: the first nights teach the bound loop until the pair has closed one.
+  if (run.partner && run.depth <= 2 && !run.stats.boundLoops && run.waveTime > 2.5) tip = 'Two Needles: cross your partner\'s thread twice to BIND a loop (double power)!';
+  else if (run.depth === 1 && run.stats.loops === 0 && run.waveTime > 2.5) tip = 'Circle the moths: cross your own thread to close a loop!';
   else if (run.depth === 2 && run.waveTime < 6) tip = 'Loops also darn holes shut. Space to snip-dash.';
   else if (run.depth === 3 && run.waveTime < 6) tip = 'Moths crave gold-star heirlooms: each one kept pays at dawn.';
   if (!tip) return;

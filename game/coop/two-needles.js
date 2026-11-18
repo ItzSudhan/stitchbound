@@ -5,11 +5,11 @@
 // the stretch of each thread between the two crossings makes a BOUND LOOP. A bound loop is pulled
 // by two hands, so it cinches twice as hard, darns twice as much and scores double.
 import { VIEW } from '../core/config.js';
-import { distance, polygonArea, segmentIntersection } from '../core/geometry.js';
+import { angleDelta, distance, polygonArea, segmentIntersection } from '../core/geometry.js';
 import { createThread } from '../world/thread.js';
 
 /** The partner's thread and needle colours. */
-export const PARTNER = { thread: '#2f8fe0', threadLight: '#bfe3ff', needle: '#f5c542', name: 'Gold Needle' };
+export const PARTNER = { thread: '#2f8fe0', threadLight: '#bfe3ff', needle: '#e0b040', name: 'Brass Needle' };
 
 // How much harder a bound loop pulls than a single needle's loop is mods.boundPower: 2, or 3 with
 // the Cat's Cradle relic (items/relics.js). Love Knot and Cradle Song add to it too.
@@ -147,7 +147,8 @@ export function partnerAim(run, needle) {
     if (e.dead || e.buried || e.passive) continue;
     const d = distance(needle.x, needle.y, e.x, e.y);
     if (d > 620) continue;
-    const off = Math.abs(Math.atan2(Math.sin(Math.atan2(e.y - needle.y, e.x - needle.x) - facing), Math.cos(Math.atan2(e.y - needle.y, e.x - needle.x) - facing)));
+    // How far off the needle's heading the pest is, in radians (0 = dead ahead).
+    const off = Math.abs(angleDelta(facing, Math.atan2(e.y - needle.y, e.x - needle.x)));
     if (off > 1.1) continue;
     const score = d * (1 + off);
     if (score < bestScore) {
