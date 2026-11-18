@@ -25,7 +25,7 @@ import { drawPause } from './ui/pause-screen.js';
 import { CODEX_BACK, drawCodex } from './ui/codex-screen.js';
 import { createPilot, pilotChooseCard, pilotChooseNode, pilotChooseOption, pilotChooseWare, pilotIntent } from './demo/autopilot.js';
 import { stageShot } from './demo/shots.js';
-import { createAudio } from './audio/sound.js';
+import { createAudio } from './audio/mixer.js';
 import { createInput } from './core/input.js';
 import { bestScore, recordScore } from './core/storage.js';
 import { inRect } from './core/geometry.js';

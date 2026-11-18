@@ -112,27 +112,35 @@ export function enterNode(run, node) {
 
 /** After a cleared night: the notion draft (four cards with a Needle Case). */
 export function offerNotions(run) {
-  const choices = draftNotions(run.rng, run.owned, run.mods.draftSize).map((n) => ({
-    kind: 'notion',
-    id: n.id,
-    name: n.name,
-    text: n.text,
-    color: n.color,
-    level: run.owned[n.id] ?? 0,
-    completes: synergiesCompletedBy(run.owned, run.relics, { notion: n.id }).map((s) => s.name),
-  }));
+  const choices = draftNotions(run.rng, run.owned, run.mods.draftSize).map((n) => {
+    const synergies = synergiesCompletedBy(run.owned, run.relics, { notion: n.id });
+    return {
+      kind: 'notion',
+      id: n.id,
+      name: n.name,
+      text: n.text,
+      color: n.color,
+      level: run.owned[n.id] ?? 0,
+      completes: synergies.map((s) => s.name),
+      completesText: synergies[0]?.text ?? '',
+    };
+  });
   run.offer = { kind: 'notion', title: `NIGHT ${run.depth} SURVIVED`, subtitle: 'Choose a notion for your sewing box', choices };
 }
 
 function offerRelics(run, title, subtitle) {
-  const choices = draftRelics(run.rng, run.relics, 3).map((r) => ({
-    kind: 'relic',
-    id: r.id,
-    name: r.name,
-    text: r.text,
-    color: r.color,
-    completes: synergiesCompletedBy(run.owned, run.relics, { relic: r.id }).map((s) => s.name),
-  }));
+  const choices = draftRelics(run.rng, run.relics, 3).map((r) => {
+    const synergies = synergiesCompletedBy(run.owned, run.relics, { relic: r.id });
+    return {
+      kind: 'relic',
+      id: r.id,
+      name: r.name,
+      text: r.text,
+      color: r.color,
+      completes: synergies.map((s) => s.name),
+      completesText: synergies[0]?.text ?? '',
+    };
+  });
   if (choices.length === 0) return false;
   run.offer = { kind: 'relic', title, subtitle, choices };
   return true;

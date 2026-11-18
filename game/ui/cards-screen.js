@@ -8,10 +8,10 @@ import { dimScreen, drawFeltPanel, drawText, drawWrapped } from './widgets.js';
 
 export function cardRects(count) {
   const w = count >= 4 ? 280 : 330;
-  const h = 420;
+  const h = 460;
   const gap = count >= 4 ? 20 : 36;
   const x0 = VIEW.width / 2 - (w * count + gap * (count - 1)) / 2;
-  return Array.from({ length: count }, (_, i) => ({ x: x0 + i * (w + gap), y: 236, w, h }));
+  return Array.from({ length: count }, (_, i) => ({ x: x0 + i * (w + gap), y: 222, w, h }));
 }
 
 export function drawCards(ctx, offer, hover, age) {
@@ -34,14 +34,19 @@ export function drawCards(ctx, offer, hover, age) {
     drawText(ctx, choice.name, r.w / 2, 214, { size: r.w < 300 ? 28 : 32, color: PALETTE.ink, outline: 0 });
     drawWrapped(ctx, choice.text, r.w / 2, 262, r.w - 50, 32, { size: 23, color: PALETTE.ink, outline: 0, weight: 'normal' });
     const tag = choice.kind === 'notion' ? (choice.level > 0 ? `Level ${choice.level} -> ${choice.level + 1}` : 'New notion') : relic ? 'RELIC' : ' ';
-    drawText(ctx, tag, r.w / 2, 340, { size: 21, color: PALETTE.terracotta, outline: 0 });
-    drawText(ctx, `[ ${i + 1} ]`, r.w / 2, 382, { size: 26, color: PALETTE.navy, outline: 0 });
+    drawText(ctx, tag, r.w / 2, 330, { size: 21, color: PALETTE.terracotta, outline: 0 });
+    drawText(ctx, `[ ${i + 1} ]`, r.w / 2, 366, { size: 26, color: PALETTE.navy, outline: 0 });
     if (choice.completes && choice.completes.length > 0) {
       drawFeltPanel(ctx, -10, -26, r.w + 20, 48, '#2b1f33', PALETTE.gold, 12);
       drawText(ctx, `COMPLETES ${choice.completes[0].toUpperCase()}`, r.w / 2, -1, { size: 20, color: PALETTE.gold, outline: 3, font: FONT.plain });
+      // What the synergy does, on a dark band at the foot of the card.
+      drawFeltPanel(ctx, 10, r.h - 66, r.w - 20, 56, '#2b1f33', PALETTE.gold, 10);
+      drawWrapped(ctx, choice.completesText, r.w / 2, r.h - 46, r.w - 44, 18, { size: 15, color: PALETTE.gold, outline: 0 });
+    } else if (choice.kind !== 'rest') {
+      drawWrapped(ctx, choice.kind === 'relic' ? 'Relics last the whole run' : 'Notions stack: take it again to level up', r.w / 2, r.h - 46, r.w - 44, 18, { size: 15, color: PALETTE.steelDark, outline: 0, weight: 'normal' });
     }
     ctx.restore();
   });
   const keys = offer.choices.map((_, i) => i + 1).join(', ');
-  drawText(ctx, `Press ${keys}, or click a card`, VIEW.width / 2, 712, { size: 26, color: PALETTE.cream, outline: 6 });
+  drawText(ctx, `Press ${keys}, or click a card`, VIEW.width / 2, 728, { size: 26, color: PALETTE.cream, outline: 6 });
 }

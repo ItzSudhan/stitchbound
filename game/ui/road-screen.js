@@ -36,7 +36,7 @@ export function drawRoad(ctx, run, view) {
   dimScreen(ctx, VIEW.width, VIEW.height, 0.45);
   drawText(ctx, 'STITCHBOUND', 150, 42, { size: 34, color: PALETTE.cream, font: FONT.display, outline: 6, stitch: PALETTE.thread });
   drawText(ctx, 'THE QUILT ROAD', VIEW.width / 2, 52, { size: 52, color: PALETTE.gold, font: FONT.plain, outline: 8 });
-  drawText(ctx, `${run.quilt.theme.name}  ·  seed ${run.seed}`, VIEW.width / 2, 100, { size: 20, color: PALETTE.cream, outline: 4 });
+  drawText(ctx, `Seed ${run.seed}  ·  click a glowing patch, or press 1, 2, 3`, VIEW.width / 2, 100, { size: 20, color: PALETTE.cream, outline: 4 });
   drawKitStrip(ctx, run);
 
   drawFeltPanel(ctx, 50, 170, 1180, 470, 'rgba(239,224,192,0.94)', 'rgba(42,29,26,0.45)', 24);
@@ -122,14 +122,26 @@ function drawNodeInfo(ctx, node) {
   drawText(ctx, mod ? `${mod.name}: ${mod.text}` : node.type === 'fight' ? 'A quiet night' : ' ', VIEW.width / 2, 656, { size: 19, color: mod && mod.tone === 'good' ? '#9fe0c8' : mod ? PALETTE.threadLight : PALETTE.paper, outline: 3 });
 }
 
+/** The key to the road: every kind of patch and what it gives. */
+const LEGEND = [
+  ['fight', 'Night', 'a notion'],
+  ['elite', 'Elite', 'notion + relic'],
+  ['treasure', 'Sewing Box', 'a relic'],
+  ['rest', 'Tea & Rest', 'heal or darn'],
+  ['merchant', 'Peddler', 'spend sequins'],
+  ['event', 'Mystery', 'a risky choice'],
+  ['boss', 'Boss', 'a relic; night 10 wins'],
+];
+
 function drawLegend(ctx, time) {
-  const entries = ['fight', 'elite', 'treasure', 'rest', 'merchant', 'event', 'boss'];
-  const step = 168;
-  const x0 = VIEW.width / 2 - (step * (entries.length - 1)) / 2;
-  entries.forEach((type, i) => {
-    const x = x0 + i * step;
-    drawNodeIcon(ctx, type, x - 44, 732, 40, time);
-    drawText(ctx, NODE_TYPES[type].name, x - 18, 733, { size: 18, color: PALETTE.cream, align: 'left', outline: 4 });
+  LEGEND.forEach(([type, name, gives], i) => {
+    const row = i < 4 ? 0 : 1;
+    const col = row === 0 ? i : i - 4;
+    const x = (row === 0 ? 40 : 190) + col * 305;
+    const y = 708 + row * 50;
+    drawNodeIcon(ctx, type, x + 20, y, 40, time);
+    drawText(ctx, `${name}:`, x + 48, y, { size: 19, color: PALETTE.gold, align: 'left', outline: 4, font: FONT.plain });
+    ctx.font = `bold 19px ${FONT.plain}`;
+    drawText(ctx, gives, x + 56 + ctx.measureText(`${name}:`).width, y, { size: 19, color: PALETTE.cream, align: 'left', outline: 4 });
   });
-  drawText(ctx, 'Click a glowing patch, or press 1, 2, 3', VIEW.width / 2, 778, { size: 18, color: PALETTE.gold, outline: 4 });
 }

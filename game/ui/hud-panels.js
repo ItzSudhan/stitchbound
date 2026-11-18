@@ -184,7 +184,7 @@ function drawPatchList(ctx, run, top) {
   const counts = {};
   for (const p of run.quilt.patches) if (p.kind && p.hp > 0) counts[p.kind] = (counts[p.kind] ?? 0) + 1;
   const kinds = Object.keys(PATCH_KINDS).filter((k) => counts[k]);
-  drawText(ctx, 'PATCHES ON THE BOARD', RIGHT + COL / 2, top, { size: 17, color: PALETTE.thread, outline: 0, font: FONT.plain });
+  drawText(ctx, 'PATCHES HERE', RIGHT + COL / 2, top, { size: 17, color: PALETTE.thread, outline: 0, font: FONT.plain });
   if (kinds.length === 0) line(ctx, 'Plain cloth tonight', RIGHT + 16, top + 30, { size: 15, weight: 'normal' });
   kinds.forEach((kind, i) => {
     const info = PATCH_KINDS[kind];

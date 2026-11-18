@@ -14,7 +14,7 @@ const HEADLINES = {
 };
 
 export function drawResults(ctx, summary, time) {
-  dimScreen(ctx, VIEW.width, VIEW.height, 0.62);
+  dimScreen(ctx, VIEW.width, VIEW.height, 0.82);
   const [title, line, color] = HEADLINES[summary.outcome];
   drawText(ctx, title, VIEW.width / 2, 70, { size: 70, color, font: FONT.display, outline: 10, stitch: PALETTE.cream });
   drawText(ctx, `${line}   ${summary.mode} · ${summary.needle}`, VIEW.width / 2, 132, { size: 24, color: PALETTE.cream, outline: 5 });
@@ -40,10 +40,11 @@ export function drawResults(ctx, summary, time) {
     ['Heirlooms kept', `${summary.heirlooms} / 8`],
     ['Sequins earned', formatNumber(summary.sequins)],
     ['Top combo', `x${summary.combo}`],
+    ['Night goals met', String(summary.goals)],
     ['Time', formatTime(summary.time)],
   ];
   stats.forEach(([label, value], i) => {
-    const y = py + 40 + i * 33;
+    const y = py + 36 + i * 31;
     drawText(ctx, label, px + 520, y, { size: 22, color: PALETTE.ink, align: 'left', outline: 0, weight: 'normal' });
     drawText(ctx, value, px + 930, y, { size: 24, color: PALETTE.navy, align: 'right', outline: 0 });
   });

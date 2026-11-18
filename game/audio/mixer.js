@@ -1,5 +1,6 @@
-// The game's one audio front door: starts the synthesiser on the first click or key (as browsers
-// require), plays the effect for each game event (rate-limited per kind), picks the music, mutes.
+// The audio mixer, the game's one audio front door: starts the synthesiser on the first click or
+// key (as browsers require), plays the effect for each game event (rate-limited per kind), picks
+// the music for the moment, and mutes.
 import { createSynth } from './synth.js';
 import { soundTable } from './sfx.js';
 import { createMusic } from './music.js';
