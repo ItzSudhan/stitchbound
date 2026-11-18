@@ -10,6 +10,7 @@ import { spawnMatriarch, spawnWyrm } from '../entities/bosses.js';
 import { darnPatches, heirloomsKept, quiltIntegrity } from './quilt.js';
 import { modifierById } from './modifiers.js';
 import { generateBoard } from './quilt-gen.js';
+import { createNightGoals, payGoals } from './goals.js';
 import { addBonus, awardSequins } from '../run/scoring.js';
 
 const KIND_COST = { moth: 1, silverfish: 0.5, beetle: 2.5, spitter: 3, snipper: 2.5, lintBall: 2.5, burrower: 2, carpetBeetle: 2.5 };
@@ -107,6 +108,7 @@ export function startNight(run, night) {
   queue.sort((a, b) => a.at - b.at);
   run.spawnQueue = queue;
   run.waveTotal = queue.length;
+  createNightGoals(run, night);
   run.events.push({ type: night.boss ? 'bossWave' : 'waveStart' });
 }
 
@@ -150,6 +152,7 @@ function clearNight(run) {
   const kept = heirloomsKept(run.quilt);
   if (kept > 0) addBonus(run, Math.round(kept * 150 * run.mods.heirloomBonus), `HEIRLOOMS x${kept}`, 640, 380);
   awardSequins(run, 5 + night.depth, 640, 430);
+  payGoals(run);
   run.events.push({ type: 'waveClear' });
   if (night.boss === 'matriarch' && !run.endless) {
     run.outcome = 'win';

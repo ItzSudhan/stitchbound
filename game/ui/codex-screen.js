@@ -6,32 +6,14 @@ import { CODEX_PESTS, PEST_NAMES, codexCounts, loadCodex } from '../meta/codex.j
 import { PATCH_KINDS } from '../world/patches.js';
 import { RELICS } from '../items/relics.js';
 import { SYNERGIES } from '../items/synergies.js';
-import { drawBeetle, drawButtonShape, drawMatriarch, drawMoth, drawSilverfish, drawSnipper, drawSpitter, drawYarnBall } from '../render/sprites.js';
-import { drawLintBall } from '../entities/lint-ball.js';
-import { drawBurrower } from '../entities/burrower.js';
-import { drawCarpetBeetle } from '../entities/carpet-beetle.js';
+import { drawButtonShape } from '../render/sprites.js';
+import { PORTRAITS } from '../render/portraits.js';
 import { drawCandles, drawFrayedPatches } from '../render/patch-art.js';
 import { drawRelicIcon } from '../render/icons.js';
 import { dimScreen, drawButton, drawFeltPanel, drawText } from './widgets.js';
 
 export const CODEX_BACK = { x: 1010, y: 724, w: 220, h: 56 };
 
-const critter = (fields) => ({ x: 0, y: 0, angle: -Math.PI / 2, seed: 1, state: 'move', flash: 0, index: 1, ...fields });
-const PORTRAITS = {
-  moth: (ctx, t) => drawMoth(ctx, critter({ r: 19 }), t),
-  silverfish: (ctx, t) => drawSilverfish(ctx, critter({ r: 15, angle: -0.5 }), t),
-  beetle: (ctx, t) => drawBeetle(ctx, critter({ r: 20 }), t),
-  snipper: (ctx, t) => drawSnipper(ctx, critter({ r: 16, angle: -0.6 }), t),
-  spitter: (ctx, t) => drawSpitter(ctx, critter({ r: 19 }), t),
-  lintBall: (ctx, t) => drawLintBall(ctx, critter({ r: 20, angle: 0 }), t),
-  burrower: (ctx, t) => drawBurrower(ctx, critter({ r: 14, angle: -0.5, buried: false }), t),
-  carpetBeetle: (ctx, t) => drawCarpetBeetle(ctx, critter({ r: 18 }), t),
-  wyrm: (ctx, t) => {
-    drawYarnBall(ctx, critter({ x: -14, r: 14, index: 2 }), t, false);
-    drawYarnBall(ctx, critter({ x: 8, r: 17, angle: 0 }), t, true);
-  },
-  matriarch: (ctx, t) => drawMatriarch(ctx, critter({ r: 17, angle: 0 }), t),
-};
 
 function drawPatchTile(ctx, kind, x, y, time) {
   ctx.fillStyle = '#d9a5b3';

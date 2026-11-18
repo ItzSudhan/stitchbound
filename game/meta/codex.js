@@ -10,6 +10,18 @@ export const PEST_NAMES = {
   moth: 'Moth', silverfish: 'Silverfish', beetle: 'Button Beetle', snipper: 'Snipper', spitter: 'Pincushion',
   lintBall: 'Lint Ball', burrower: 'Burrower', carpetBeetle: 'Carpet Beetle', wyrm: 'Yarn Wyrm', matriarch: 'Moth Matriarch',
 };
+export const PEST_EFFECTS = {
+  moth: 'Eats holes in the quilt',
+  silverfish: 'Fast; bites the needle',
+  beetle: 'Winds up and charges',
+  snipper: 'Snips your thread',
+  spitter: 'Fires fans of pins',
+  lintBall: 'Splits in two when hit',
+  burrower: 'Tunnels, tears cloth',
+  carpetBeetle: 'Chews along seams',
+  wyrm: 'Boss: coils and lunges',
+  matriarch: 'Boss: dust and brood',
+};
 
 export function loadCodex() {
   const save = loadSave();

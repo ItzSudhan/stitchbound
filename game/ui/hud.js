@@ -27,6 +27,13 @@ export function drawHud(ctx, run, best, time) {
   drawAnnouncements(ctx, run);
 }
 
+/** The parts of the HUD that live on the field itself: the night banner, synergy ribbons, tips. */
+export function drawFieldOverlays(ctx, run, time) {
+  drawTip(ctx, run, time);
+  drawBanner(ctx, run);
+  drawAnnouncements(ctx, run);
+}
+
 function drawHealthAndSequins(ctx, run) {
   const max = run.mods.hp;
   const w = 64 + max * 34;

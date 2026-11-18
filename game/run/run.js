@@ -67,7 +67,9 @@ export function createRun({ seed, modeId = 'classic', needleId = 'steel' }) {
     offer: null,
     shop: null,
     event: null,
-    stats: { kills: 0, loops: 0, biggestLoop: 0, mended: 0, hits: 0, picks: [], sequins: 0, nightsFought: 0, wyrmBeaten: false },
+    goals: null,
+    goalStart: { loops: 0 },
+    stats: { goals: 0, kills: 0, loops: 0, biggestLoop: 0, mended: 0, hits: 0, picks: [], sequins: 0, nightsFought: 0, wyrmBeaten: false },
   };
   run.mods = computeMods(run).mods;
   run.player = createPlayer(run.mods);
