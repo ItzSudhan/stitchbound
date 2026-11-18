@@ -8,7 +8,7 @@
 //   event  a mystery patch
 //   wyrm   the Yarn Wyrm fight
 //   end    the results card of the run
-//   title  the title screen over its attract-mode quilt
+//   title  the title screen over its attract-mode quilt, with this seed's run as the best score
 // "Busiest moment" is found by playing the run once, scoring every frame, then replaying the
 // same seed to the best frame: the run is deterministic, so the replay is the same game.
 import { driveRun } from './run-driver.js';
@@ -91,8 +91,11 @@ export function stageShot(name, seed, needleId = 'steel') {
       return { screen: 'over', run, summary: summarizeRun(run, 0), time: run.time };
     }
     case 'title': {
-      const { run } = driveRun(options, (r) => r.inNight && r.time > 9);
-      return { screen: 'title', run, time: 9 };
+      // The title as it looks after this seed's run has been played once: its score is the best.
+      const best = driveRun(options, () => false).run.score;
+      const calm = (r) => r.fx.callouts.length === 0 && r.fx.floaters.length === 0;
+      const { run } = driveRun(options, (r) => r.inNight && r.time > 9 && calm(r));
+      return { screen: 'title', run, time: 9, best };
     }
     default:
       return null;

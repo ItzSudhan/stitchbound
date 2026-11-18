@@ -399,6 +399,7 @@ function stage(name) {
   if (scene.screen === 'title') state.demoRun = scene.run;
   else state.run = scene.run;
   if (scene.summary) state.summary = scene.summary;
+  if (scene.best) recordScore(currentMode().id, scene.best);
   render();
   render();
   window.__shotReady = true;

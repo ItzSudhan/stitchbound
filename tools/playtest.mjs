@@ -40,9 +40,9 @@ try {
   check('a locked needle cannot start a run', (await S('s.screen')) === 'title');
   await chrome.key('ArrowLeft');
   await sleep(300);
-  await chrome.click(640, 685);
+  await chrome.click(336, 312);
   await waitScreen('map');
-  check('click starts a run on the quilt road', true, `${await S('s.run.road.columns.length')} columns`);
+  check('clicking NEW RUN starts a run on the quilt road', true, `${await S('s.run.road.columns.length')} columns`);
   await chrome.key('Digit1');
   await waitScreen('play');
   check('key 1 steps onto the first patch: a night', (await S('s.run.depth')) === 1);
