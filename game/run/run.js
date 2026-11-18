@@ -6,8 +6,8 @@ import { draftRelics } from '../items/relics.js';
 import { synergiesCompletedBy } from '../items/synergies.js';
 import { needleById } from '../meta/needles.js';
 import { dayKey, modeById } from '../meta/modes.js';
+import { generateBoard } from '../world/quilt-gen.js';
 import { extendRoad, generateRoad, reachableNodes } from './route-map.js';
-import { createQuilt } from '../world/quilt.js';
 import { createThread } from '../world/thread.js';
 import { createEffects } from '../render/effects.js';
 import { createCombo } from './scoring.js';
@@ -30,7 +30,7 @@ export function createRun({ seed, modeId = 'classic', needleId = 'steel' }) {
     dayKey: mode.daily ? dayKey() : null,
     rng: createRandom(mixSeed(seed, 1)),
     fx: createEffects(seed),
-    quilt: createQuilt(seed),
+    quilt: generateBoard(seed, 1),
     road: generateRoad(seed, mode.endless ? 15 : ROAD_LENGTH),
     node: null,
     depth: 0,
