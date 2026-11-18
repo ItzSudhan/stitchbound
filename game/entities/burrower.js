@@ -7,13 +7,14 @@ import { VIEW } from '../core/config.js';
 import { nibblePatch } from '../world/quilt.js';
 import { patchUnder } from '../world/patches.js';
 import { burst } from '../render/effects.js';
+import { nearestNeedle } from '../coop/two-needles.js';
 import { drawShadow, inked } from '../render/sprites.js';
 
 const UNDER_SECONDS = 3.2;
 const SURFACE_SECONDS = 2.4;
 
 export function updateBurrower(run, enemy, dt) {
-  const p = run.player;
+  const p = nearestNeedle(run, enemy.x, enemy.y);
   enemy.timer -= dt;
   if (enemy.state !== 'surface') {
     enemy.buried = true;

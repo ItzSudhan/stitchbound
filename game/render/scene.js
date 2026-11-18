@@ -1,11 +1,12 @@
 // Paints the play scene: the quilt, the night's shade, the laid thread and cinching loops,
 // telegraphs, spare spools, every creature, pins and shots, the needle, then the particles and
 // screen flash, all under the screen shake.
-import { PALETTE, VIEW } from '../core/config.js';
+import { FONT, PALETTE, VIEW } from '../core/config.js';
 import { TAU } from '../core/geometry.js';
 import { drawQuilt } from './quilt-art.js';
 import { drawCandles, drawFrayedPatches } from './patch-art.js';
 import { drawDarkness } from './darkness.js';
+import { PARTNER, nearestNeedle } from '../coop/two-needles.js';
 import { drawLintBall } from '../entities/lint-ball.js';
 import { drawBurrower } from '../entities/burrower.js';
 import { drawCarpetBeetle } from '../entities/carpet-beetle.js';
@@ -13,7 +14,7 @@ import { cinchShape } from '../run/night.js';
 import { buttonPositions } from '../entities/player.js';
 import { spoolTimeLeft } from '../entities/pickups.js';
 import { needleById } from '../meta/needles.js';
-import { drawSpool } from '../ui/widgets.js';
+import { drawSpool, drawText } from '../ui/widgets.js';
 import { drawFloaters, drawParticles, drawRings, drawScreenFlash, shakeOffset } from './effects.js';
 import {
   drawBeetle,
@@ -39,7 +40,7 @@ export function drawScene(ctx, run, time, { needle = true } = {}) {
   drawNightShade(ctx, run);
   drawFrayedPatches(ctx, run.quilt, time);
   drawCinches(ctx, run);
-  if (needle) drawThread(ctx, run, time);
+  if (needle) drawThreads(ctx, run, time);
   drawTelegraphs(ctx, run);
   drawPickups(ctx, run, time);
   const enemies = [...run.enemies].sort((a, b) => (DRAW_ORDER[a.kind] ?? 3) - (DRAW_ORDER[b.kind] ?? 3) || (b.index ?? 0) - (a.index ?? 0));
@@ -54,6 +55,12 @@ export function drawScene(ctx, run, time, { needle = true } = {}) {
   if (needle && (!run.outcome || run.outcome === 'win' || run.outcome === 'quilt')) {
     for (const b of buttonPositions(run)) drawGuardButton(ctx, b.x, b.y);
     drawNeedle(ctx, run.player, time, needleById(run.needleId).color);
+    if (run.partner) {
+      drawNeedle(ctx, run.partner, time, PARTNER.needle);
+      // Who is who: a small tag over each needle in its thread's colour.
+      drawText(ctx, 'P1', run.player.x, run.player.y - 36, { size: 18, color: PALETTE.threadLight, outline: 4, font: FONT.plain });
+      drawText(ctx, 'P2', run.partner.x, run.partner.y - 36, { size: 18, color: PARTNER.threadLight, outline: 4, font: FONT.plain });
+    }
   }
   drawRings(ctx, run.fx);
   drawParticles(ctx, run.fx);
@@ -143,11 +150,16 @@ function drawEnemy(ctx, enemy, time) {
   }
 }
 
-/** The red thread the needle lays, with a stitched highlight. */
-function drawThread(ctx, run, time) {
-  const points = run.thread.points;
+/** The red thread the needle lays (and, in a Two Needles run, the partner's blue one). */
+function drawThreads(ctx, run, time) {
+  drawThread(ctx, run, run.thread, run.player, PALETTE.thread, 'rgba(255,190,190,0.85)', time);
+  if (run.partner) drawThread(ctx, run, run.partnerThread, run.partner, PARTNER.thread, PARTNER.threadLight, time);
+}
+
+/** One needle's thread, with a stitched highlight. */
+function drawThread(ctx, run, thread, p, color, light, time) {
+  const points = thread.points;
   if (points.length < 2) return;
-  const p = run.player;
   ctx.lineCap = 'round';
   ctx.lineJoin = 'round';
   const path = () => {
@@ -167,10 +179,10 @@ function drawThread(ctx, run, time) {
   ctx.strokeStyle = PALETTE.ink;
   ctx.lineWidth = 8;
   ctx.stroke();
-  ctx.strokeStyle = PALETTE.thread;
+  ctx.strokeStyle = color;
   ctx.lineWidth = 5;
   ctx.stroke();
-  ctx.strokeStyle = 'rgba(255,190,190,0.85)';
+  ctx.strokeStyle = light;
   ctx.lineWidth = 1.5;
   ctx.setLineDash([5, 7]);
   ctx.lineDashOffset = -time * 30;
@@ -192,7 +204,7 @@ function drawThread(ctx, run, time) {
   // The thread's loose tail: a little knot so the player can see where it ends.
   ctx.beginPath();
   ctx.arc(points[0].x, points[0].y, 5, 0, TAU);
-  ctx.fillStyle = PALETTE.thread;
+  ctx.fillStyle = color;
   ctx.fill();
   ctx.strokeStyle = PALETTE.ink;
   ctx.lineWidth = 2;
@@ -215,6 +227,12 @@ function drawCinches(ctx, run) {
     ctx.strokeStyle = PALETTE.thread;
     ctx.lineWidth = 6.5;
     ctx.stroke();
+    if (cinch.bound) {
+      // A bound loop is pulled by both needles: red and blue thread twisted together.
+      ctx.strokeStyle = PARTNER.thread;
+      ctx.setLineDash([14, 14]);
+      ctx.stroke();
+    }
     ctx.strokeStyle = PALETTE.gold;
     ctx.lineWidth = 2.5;
     ctx.setLineDash([8, 6]);
@@ -236,7 +254,8 @@ function drawTelegraphs(ctx, run) {
       ctx.stroke();
       ctx.setLineDash([]);
     } else if (e.kind === 'spitter' && e.state === 'aim') {
-      const a = Math.atan2(run.player.y - e.y, run.player.x - e.x);
+      const target = nearestNeedle(run, e.x, e.y);
+      const a = Math.atan2(target.y - e.y, target.x - e.x);
       ctx.fillStyle = 'rgba(224,71,58,0.16)';
       ctx.beginPath();
       ctx.moveTo(e.x, e.y);

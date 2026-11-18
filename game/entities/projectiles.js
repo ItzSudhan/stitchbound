@@ -7,6 +7,7 @@ import { buttonPositions, hurtPlayer } from './player.js';
 import { burst } from '../render/effects.js';
 import { buttonPatchHit } from '../world/patches.js';
 import { lightDamageBonus } from '../world/lighting.js';
+import { needlesOf } from '../coop/two-needles.js';
 
 const PIN_SPREAD = 0.13;
 
@@ -102,7 +103,6 @@ export function spawnShotRing(run, x, y, count, speed, kind, offset = 0) {
 }
 
 export function updateShots(run, dt) {
-  const p = run.player;
   const guards = buttonPositions(run);
   for (const shot of run.shots) {
     shot.life -= dt;
@@ -119,8 +119,12 @@ export function updateShots(run, dt) {
         break;
       }
     }
-    if (shot.life > 0 && distance(shot.x, shot.y, p.x, p.y) < shot.r + 10) {
-      if (hurtPlayer(run, 1) || p.invuln > 0) shot.life = 0;
+    if (shot.life <= 0) continue;
+    for (const needle of needlesOf(run)) {
+      if (distance(shot.x, shot.y, needle.x, needle.y) < shot.r + 10) {
+        if (hurtPlayer(run, 1, needle) || needle.invuln > 0) shot.life = 0;
+        break;
+      }
     }
   }
   run.shots = run.shots.filter((shot) => shot.life > 0);

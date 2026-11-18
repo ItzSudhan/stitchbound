@@ -15,7 +15,7 @@ export function createInput(canvas) {
   };
 
   window.addEventListener('keydown', (event) => {
-    if (['Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Tab'].includes(event.code)) event.preventDefault();
+    if (['Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Tab', 'Slash'].includes(event.code)) event.preventDefault();
     if (!event.repeat) pressed.add(event.code);
     held.add(event.code);
   });
@@ -47,10 +47,11 @@ export function createInput(canvas) {
       for (let i = 1; i <= 9; i += 1) if (pressed.has(`Digit${i}`) || pressed.has(`Numpad${i}`)) return i - 1;
       return -1;
     },
-    /** Movement as a vector from WASD or the arrow keys. */
-    moveVector() {
-      const x = (held.has('KeyD') || held.has('ArrowRight') ? 1 : 0) - (held.has('KeyA') || held.has('ArrowLeft') ? 1 : 0);
-      const y = (held.has('KeyS') || held.has('ArrowDown') ? 1 : 0) - (held.has('KeyW') || held.has('ArrowUp') ? 1 : 0);
+    /** Movement as a vector from WASD or the arrow keys (WASD only when player two has the arrows). */
+    moveVector(wasdOnly = false) {
+      const arrows = !wasdOnly;
+      const x = (held.has('KeyD') || (arrows && held.has('ArrowRight')) ? 1 : 0) - (held.has('KeyA') || (arrows && held.has('ArrowLeft')) ? 1 : 0);
+      const y = (held.has('KeyS') || (arrows && held.has('ArrowDown')) ? 1 : 0) - (held.has('KeyW') || (arrows && held.has('ArrowUp')) ? 1 : 0);
       return { x, y };
     },
     /** Call once at the end of each frame: one-shot presses and clicks are forgotten. */

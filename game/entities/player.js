@@ -32,9 +32,11 @@ export function createPlayer(mods) {
   };
 }
 
-/** Moves the needle and handles its dash and firing for one step of the given intent. */
-export function updatePlayer(run, intent, dt) {
-  const p = run.player;
+/**
+ * Moves a needle and handles its dash and firing for one step of the given intent: the first
+ * needle by default, or the Two Needles partner.
+ */
+export function updatePlayer(run, intent, dt, p = run.player) {
   const mods = run.mods;
   p.invuln = Math.max(0, p.invuln - dt);
   p.hurt = Math.max(0, p.hurt - dt * 3);
@@ -116,28 +118,33 @@ export function buttonPositions(run) {
   return out;
 }
 
-/** Hurts the needle unless it is in mercy frames, dashing or shielded; returns true when it took the hit. */
-export function hurtPlayer(run, amount = 1) {
+/**
+ * Hurts a needle (the first by default, or the Two Needles partner) unless it is in mercy frames,
+ * dashing or shielded; returns true when it took the hit. Spools and the thimble's shield belong
+ * to the first needle and are shared by both.
+ */
+export function hurtPlayer(run, amount = 1, who = run.player) {
   const p = run.player;
-  if (p.invuln > 0 || run.outcome) return false;
+  if (who.invuln > 0 || run.outcome) return false;
   if (p.shield > 0) {
     p.shield -= 1;
-    p.invuln = run.mods.invulnTime;
-    ring(run.fx, p.x, p.y, PALETTE.gold, 70, 0.5, 8);
-    floatText(run.fx, p.x, p.y - 40, 'THIMBLE!', PALETTE.gold, 24);
+    who.invuln = run.mods.invulnTime;
+    ring(run.fx, who.x, who.y, PALETTE.gold, 70, 0.5, 8);
+    floatText(run.fx, who.x, who.y - 40, 'THIMBLE!', PALETTE.gold, 24);
     run.events.push({ type: 'block' });
     return false;
   }
   // The attract-mode and screenshot pilot is spared its last spool so its demo run goes on.
   p.hp = run.immortal ? Math.max(1, p.hp - amount) : p.hp - amount;
-  p.invuln = run.mods.invulnTime;
+  who.invuln = run.mods.invulnTime;
+  who.hurt = 1;
   p.hurt = 1;
   run.stats.hits += 1;
   run.events.push({ type: 'hurt' });
   addShake(run.fx, 14);
   screenFlash(run.fx, '#e0473a', 0.55);
-  burst(run.fx, p.x, p.y, { count: 16, colors: ['#d6333f', '#ff8a8a', '#ffffff'], speed: 260, size: 5, kind: 'fiber' });
+  burst(run.fx, who.x, who.y, { count: 16, colors: ['#d6333f', '#ff8a8a', '#ffffff'], speed: 260, size: 5, kind: 'fiber' });
   // Pincushion Heart: the hurt needle bristles, firing pins all around it.
-  for (let i = 0; i < run.mods.hurtPins; i += 1) firePinAt(run, p.x, p.y, (i / run.mods.hurtPins) * TAU);
+  for (let i = 0; i < run.mods.hurtPins; i += 1) firePinAt(run, who.x, who.y, (i / run.mods.hurtPins) * TAU);
   return true;
 }

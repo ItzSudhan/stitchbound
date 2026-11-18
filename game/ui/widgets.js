@@ -148,3 +148,9 @@ export function dimScreen(ctx, width, height, alpha) {
   ctx.fillStyle = `rgba(36,22,15,${alpha})`;
   ctx.fillRect(0, 0, width, height);
 }
+
+/** A screenshot's title: one line of big plain capitals on a dark felt ribbon across the top. */
+export function drawCaption(ctx, text, width) {
+  drawFeltPanel(ctx, 10, 8, width - 20, 112, 'rgba(31,21,40,0.94)', PALETTE.gold, 18);
+  drawText(ctx, text, width / 2, 66, { size: 70, color: PALETTE.gold, outline: 8, font: FONT.plain });
+}

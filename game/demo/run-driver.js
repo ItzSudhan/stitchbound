@@ -6,14 +6,16 @@ import { createRun, enterNode, finishNode, nextNodes, offerNotions, takeOffer } 
 import { stepNight } from '../run/night.js';
 import { buyItem } from '../run/merchant.js';
 import { chooseEventOption } from '../run/events.js';
+import { createPartnerPilot, duetIntents } from '../coop/partner-pilot.js';
 import { createPilot, pilotChooseCard, pilotChooseNode, pilotChooseOption, pilotChooseWare, pilotIntent } from './autopilot.js';
 
 const LIMIT_STEPS = 60 * 60 * 40;
 
-export function driveRun({ seed, modeId = 'classic', needleId = 'steel', immortal = true }, watch = () => false) {
-  const run = createRun({ seed, modeId, needleId });
+export function driveRun({ seed, modeId = 'classic', needleId = 'steel', immortal = true, coop = false }, watch = () => false) {
+  const run = createRun({ seed, modeId, needleId, coop });
   run.immortal = immortal;
   const pilot = createPilot();
+  const partnerPilot = createPartnerPilot();
   let screen = 'map';
   for (let step = 0; step < LIMIT_STEPS; step += 1) {
     if (watch(run, step, screen)) return { run, screen };
@@ -29,7 +31,11 @@ export function driveRun({ seed, modeId = 'classic', needleId = 'steel', immorta
         screen = 'cards';
         continue;
       }
-      stepNight(run, pilotIntent(run, pilot, STEP), STEP);
+      const intent = pilotIntent(run, pilot, STEP);
+      if (run.partner) {
+        const { first, second } = duetIntents(run, partnerPilot, pilot, intent, STEP);
+        stepNight(run, first, STEP, second);
+      } else stepNight(run, intent, STEP);
       run.events.length = 0;
       if (run.outcome) {
         run.endTime = (run.endTime ?? 0) + STEP;

@@ -4,6 +4,7 @@
 import { PALETTE } from '../core/config.js';
 import { distance } from '../core/geometry.js';
 import { burst, floatText, ring } from '../render/effects.js';
+import { nearestNeedle } from '../coop/two-needles.js';
 
 const DROP_CHANCE = { beetle: 0.3, spitter: 0.35, snipper: 0.25, wyrmSegment: 0.18, silverfish: 0.04, moth: 0.02 };
 const LIFETIME = 9;
@@ -18,7 +19,9 @@ export function updatePickups(run, dt) {
   const p = run.player;
   for (const pickup of run.pickups) {
     pickup.age += dt;
-    if (distance(pickup.x, pickup.y, p.x, p.y) > REACH) continue;
+    // Either needle may fetch it; the spools it gives back are shared.
+    const q = nearestNeedle(run, pickup.x, pickup.y);
+    if (distance(pickup.x, pickup.y, q.x, q.y) > REACH) continue;
     pickup.age = LIFETIME;
     if (p.hp < run.mods.hp) {
       p.hp += 1;

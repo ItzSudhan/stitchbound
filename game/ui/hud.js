@@ -13,6 +13,7 @@ import { relicById } from '../items/relics.js';
 import { drawNotionIcon, drawRelicIcon, drawSequin } from '../render/icons.js';
 import { drawStarShape } from '../render/quilt-art.js';
 import { drawFeltPanel, drawMeter, drawSpool, drawText, formatNumber } from './widgets.js';
+import { PARTNER } from '../coop/two-needles.js';
 
 export function drawHud(ctx, run, best, time) {
   drawHealthAndSequins(ctx, run);
@@ -116,6 +117,18 @@ function drawNeedleMeters(ctx, run) {
   drawMeter(ctx, x + 80, y + 21, 70, 18, dash, dash >= 1 ? PALETTE.teal : PALETTE.steelDark);
   drawText(ctx, 'THREAD', x + 166, y + 30, { size: 20, color: PALETTE.ink, align: 'left', outline: 0 });
   drawMeter(ctx, x + 254, y + 21, 60, 18, run.thread.length / run.mods.threadLength, PALETTE.thread);
+  if (run.partner) drawPartnerMeters(ctx, run, x, y - 68);
+}
+
+/** Two Needles: player two's dash and blue thread, and how many bound loops the pair has closed. */
+function drawPartnerMeters(ctx, run, x, y) {
+  const q = run.partner;
+  drawFeltPanel(ctx, x, y, 330, 60, '#dcebf7', 'rgba(31,95,153,0.6)', 14);
+  const dash = 1 - q.dashReady / run.mods.dashCooldown;
+  drawText(ctx, 'P2', x + 20, y + 30, { size: 20, color: PARTNER.thread, align: 'left', outline: 0 });
+  drawMeter(ctx, x + 58, y + 21, 70, 18, dash, dash >= 1 ? PALETTE.teal : PALETTE.steelDark);
+  drawText(ctx, `BOUND ${run.stats.boundLoops ?? 0}`, x + 144, y + 30, { size: 20, color: '#1f5f99', align: 'left', outline: 0 });
+  drawMeter(ctx, x + 254, y + 21, 60, 18, run.partnerThread.length / run.mods.threadLength, PARTNER.thread);
 }
 
 /** The boss's name in large plain capitals on a dark ribbon, with its health bar, low in the middle. */

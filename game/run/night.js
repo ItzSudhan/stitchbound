@@ -13,9 +13,15 @@ import { addBonus, updateCombo } from './scoring.js';
 import { PALETTE } from '../core/config.js';
 import { addShake, burst, floatText, hitStop, ring, screenFlash, updateEffects } from '../render/effects.js';
 import { distance, easeInCubic, pointInPolygon, polygonArea, polygonCentroid } from '../core/geometry.js';
+import { BOUND_POWER, findBoundLoop, spendBothThreads } from '../coop/two-needles.js';
 
-/** Advances the night by dt seconds under the player's intent {moveX, moveY, aimX, aimY, fire, dash}. */
-export function stepNight(run, intent, dt) {
+const STILL = { moveX: 0, moveY: 0, aimX: 640, aimY: 400, fire: false, dash: false };
+
+/**
+ * Advances the night by dt seconds under the player's intent {moveX, moveY, aimX, aimY, fire,
+ * dash}, and in a Two Needles run under the partner's intent too.
+ */
+export function stepNight(run, intent, dt, partnerIntent = STILL) {
   const fx = run.fx;
   for (const note of run.announcements) note.age += dt;
   run.announcements = run.announcements.filter((note) => note.age < 3.2);
@@ -27,8 +33,13 @@ export function stepNight(run, intent, dt) {
   run.time += dt;
   if (run.inNight && run.wavePhase !== 'draft' && !run.outcome) {
     updatePlayer(run, intent, dt);
-    const loop = extendThread(run.thread, run.player.x, run.player.y, run.mods.threadLength);
-    if (loop) cinchLoop(run, loop);
+    if (run.partner) {
+      updatePlayer(run, partnerIntent, dt, run.partner);
+      sewTogether(run);
+    } else {
+      const loop = extendThread(run.thread, run.player.x, run.player.y, run.mods.threadLength);
+      if (loop) cinchLoop(run, loop);
+    }
     updateEnemies(run, dt);
     stingWithThread(run, dt);
     guardWithButtons(run, dt);
@@ -39,6 +50,7 @@ export function stepNight(run, intent, dt) {
     updateNight(run, dt);
   }
   updateThread(run.thread, dt);
+  if (run.partner) updateThread(run.partnerThread, dt);
   updateCombo(run, dt);
   updateQuilt(run.quilt, dt);
   updateCinches(run, dt);
@@ -62,16 +74,47 @@ function celebrate(run) {
   screenFlash(run.fx, PALETTE.gold, 0.5);
 }
 
-/** A closed loop pulls tight: everything inside takes the cinch, holes inside are darned shut. */
-export function cinchLoop(run, polygon) {
+/**
+ * Two Needles: both needles lay thread. Each closes loops on its own thread as usual; and when a
+ * needle's new piece of thread crosses its partner's thread for the second time, the two threads
+ * close a bound loop between the crossings, which cinches with both hands.
+ */
+function sewTogether(run) {
+  const pairs = [
+    [run.player, run.thread, run.partnerThread],
+    [run.partner, run.partnerThread, run.thread],
+  ];
+  for (const [needle, mine, theirs] of pairs) {
+    const tip = mine.points[mine.points.length - 1];
+    const own = extendThread(mine, needle.x, needle.y, run.mods.threadLength);
+    if (own) {
+      cinchLoop(run, own);
+      continue;
+    }
+    // Only a new piece of thread can make a new crossing.
+    if (mine.points[mine.points.length - 1] === tip) continue;
+    const bound = findBoundLoop(mine, theirs);
+    if (bound) {
+      spendBothThreads(run);
+      cinchLoop(run, bound, BOUND_POWER);
+    }
+  }
+}
+
+/**
+ * A closed loop pulls tight: everything inside takes the cinch, holes inside are darned shut.
+ * `power` is 1 for one needle's loop and BOUND_POWER for a bound loop pulled by two.
+ */
+export function cinchLoop(run, polygon, power = 1) {
   const fx = run.fx;
   const centre = polygonCentroid(polygon);
   const area = polygonArea(polygon);
+  const bound = power > 1;
   let caught = 0;
   for (const enemy of run.enemies) {
     if (enemy.dead || enemy.buried || !pointInPolygon(enemy.x, enemy.y, polygon)) continue;
     caught += 1;
-    const damage = enemy.kind === 'matriarch' ? Math.min(450, run.mods.loopDamage * 1.4) : run.mods.loopDamage;
+    const damage = (enemy.kind === 'matriarch' ? Math.min(450, run.mods.loopDamage * 1.4) : run.mods.loopDamage) * power;
     damageEnemy(run, enemy, damage, 'loop');
     burst(fx, enemy.x, enemy.y, { count: 8, colors: [PALETTE.thread, PALETTE.gold], speed: 180, size: 6, kind: 'spark' });
   }
@@ -83,18 +126,21 @@ export function cinchLoop(run, polygon) {
     }
     ring(fx, centre.x, centre.y, PALETTE.goldDeep, reach, 0.5, 6);
   }
-  const mended = mendInside(run.quilt, polygon, run.mods.mendAmount);
+  const mended = mendInside(run.quilt, polygon, run.mods.mendAmount * power);
   run.stats.loops += 1;
+  if (bound) run.stats.boundLoops = (run.stats.boundLoops ?? 0) + 1;
   run.stats.mended += mended;
   run.stats.biggestLoop = Math.max(run.stats.biggestLoop, caught);
-  run.cinches.push({ polygon, centre, caught, age: 0, life: 0.38 });
+  run.cinches.push({ polygon, centre, caught, bound, age: 0, life: bound ? 0.5 : 0.38 });
   for (let i = 0; i < polygon.length; i += 3) {
     burst(fx, polygon[i].x, polygon[i].y, { count: 1, colors: [PALETTE.gold, PALETTE.threadLight], speed: 60, size: 6, kind: 'spark', life: 0.5 });
   }
   ring(fx, centre.x, centre.y, PALETTE.gold, Math.sqrt(area) * 0.8, 0.5, 8);
+  if (bound) ring(fx, centre.x, centre.y, '#2f8fe0', Math.sqrt(area) * 1.1, 0.6, 8);
   if (caught > 0) {
-    const bonus = 50 * caught * caught;
-    addBonus(run, bonus, caught > 1 ? `STITCH x${caught}` : 'STITCHED', centre.x, centre.y - 30);
+    const bonus = 50 * caught * caught * power;
+    const label = bound ? `BOUND x${caught}` : caught > 1 ? `STITCH x${caught}` : 'STITCHED';
+    addBonus(run, bonus, label, centre.x, centre.y - 30);
     hitStop(fx, Math.min(0.12, 0.04 + caught * 0.015));
     addShake(fx, 6 + caught * 2);
     if (caught >= 4) screenFlash(fx, PALETTE.gold, 0.35);
@@ -103,9 +149,11 @@ export function cinchLoop(run, polygon) {
       floatText(fx, run.player.x, run.player.y - 40, '+1 SPOOL', PALETTE.threadLight, 24);
     }
   } else if (mended > 0.05) {
-    floatText(fx, centre.x, centre.y, 'MENDED', PALETTE.gold, 26);
+    floatText(fx, centre.x, centre.y, bound ? 'BOUND & MENDED' : 'MENDED', PALETTE.gold, 26);
+  } else if (bound) {
+    floatText(fx, centre.x, centre.y, 'BOUND LOOP', '#bfe3ff', 26);
   }
-  run.events.push({ type: 'cinch', caught, mended });
+  run.events.push({ type: 'cinch', caught, mended, bound });
 }
 
 function updateCinches(run, dt) {
@@ -121,10 +169,13 @@ export function cinchShape(cinch) {
 
 /** Barbed Thread: pests that cross the laid thread take damage over time. */
 function stingWithThread(run, dt) {
-  if (run.mods.barbed <= 0 || run.thread.points.length < 6) return;
-  for (const enemy of run.enemies) {
-    if (enemy.dead || enemy.kind === 'matriarch') continue;
-    if (threadTouches(run.thread, enemy.x, enemy.y, enemy.r)) damageEnemy(run, enemy, run.mods.barbed * dt, 'thread');
+  if (run.mods.barbed <= 0) return;
+  for (const thread of run.partner ? [run.thread, run.partnerThread] : [run.thread]) {
+    if (thread.points.length < 6) continue;
+    for (const enemy of run.enemies) {
+      if (enemy.dead || enemy.kind === 'matriarch') continue;
+      if (threadTouches(thread, enemy.x, enemy.y, enemy.r)) damageEnemy(run, enemy, run.mods.barbed * dt, 'thread');
+    }
   }
 }
 

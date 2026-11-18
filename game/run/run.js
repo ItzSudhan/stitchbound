@@ -13,6 +13,7 @@ import { createEffects } from '../render/effects.js';
 import { createCombo } from './scoring.js';
 import { planNight, startNight } from '../world/nights.js';
 import { createPlayer } from '../entities/player.js';
+import { addPartner, resetPartnerForNight } from '../coop/two-needles.js';
 import { computeMods, gainRelic, refreshLoadout, takeNotion } from '../items/loadout.js';
 import { eventForNode } from './events.js';
 import { stockMerchant } from './merchant.js';
@@ -20,12 +21,16 @@ import { restChoices, takeRest } from './camp.js';
 import { ROAD_LENGTH } from '../core/config.js';
 import { createRandom, mixSeed } from '../core/random.js';
 
-export function createRun({ seed, modeId = 'classic', needleId = 'steel' }) {
+/** coop: a Two Needles run, with a second needle and thread for player two (coop/two-needles.js). */
+export function createRun({ seed, modeId = 'classic', needleId = 'steel', coop = false }) {
   const mode = modeById(modeId);
   const run = {
     seed,
     modeId: mode.id,
     needleId,
+    coop,
+    partner: null,
+    partnerThread: null,
     endless: mode.endless,
     dayKey: mode.daily ? dayKey() : null,
     rng: createRandom(mixSeed(seed, 1)),
@@ -72,6 +77,7 @@ export function createRun({ seed, modeId = 'classic', needleId = 'steel' }) {
   run.mods = computeMods(run).mods;
   run.player = createPlayer(run.mods);
   run.thread = createThread(run.player.x, run.player.y);
+  if (coop) addPartner(run);
   if (needleById(needleId).startRelic) gainRelic(run, draftRelics(run.rng, [], 1)[0].id);
   return run;
 }
@@ -92,6 +98,7 @@ export function enterNode(run, node) {
     run.inNight = true;
     startNight(run, planNight(run, node));
     refreshLoadout(run);
+    resetPartnerForNight(run);
     run.thread = createThread(run.player.x, run.player.y);
     return 'play';
   }

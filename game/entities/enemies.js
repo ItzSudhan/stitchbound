@@ -14,6 +14,7 @@ import { hurtPlayer } from './player.js';
 import { maybeDropSpool } from './pickups.js';
 import { nibblePatch } from '../world/quilt.js';
 import { cutThread } from '../world/thread.js';
+import { needlesOf, nearestNeedle } from '../coop/two-needles.js';
 import { addShake, burst, floatText, ring } from '../render/effects.js';
 import { awardSequins, registerKill } from '../run/scoring.js';
 import { VIEW } from '../core/config.js';
@@ -117,8 +118,10 @@ export function updateEnemies(run, dt) {
     BEHAVIOURS[enemy.kind](run, enemy, dt);
     // A pest that wanders far off the quilt is gone for good, so a night can always end.
     if (enemy.x < -200 || enemy.y < -200 || enemy.x > VIEW.width + 200 || enemy.y > VIEW.height + 200) enemy.dead = true;
-    const p = run.player;
-    if (!enemy.passive && distance(enemy.x, enemy.y, p.x, p.y) < enemy.r + 12) hurtPlayer(run, 1);
+    if (enemy.passive) continue;
+    for (const needle of needlesOf(run)) {
+      if (distance(enemy.x, enemy.y, needle.x, needle.y) < enemy.r + 12) hurtPlayer(run, 1, needle);
+    }
   }
   separateEnemies(run);
   run.enemies = run.enemies.filter((enemy) => !enemy.dead);
@@ -243,7 +246,7 @@ function updateMoth(run, enemy, dt) {
 }
 
 function updateSilverfish(run, enemy, dt) {
-  const p = run.player;
+  const p = nearestNeedle(run, enemy.x, enemy.y);
   const weave = Math.sin(enemy.age * 6 + enemy.seed) * 0.9;
   const a = Math.atan2(p.y - enemy.y, p.x - enemy.x) + weave;
   enemy.angle += angleDelta(enemy.angle, a) * Math.min(1, dt * 5);
@@ -252,7 +255,7 @@ function updateSilverfish(run, enemy, dt) {
 }
 
 function updateBeetle(run, enemy, dt) {
-  const p = run.player;
+  const p = nearestNeedle(run, enemy.x, enemy.y);
   enemy.timer -= dt;
   if (enemy.state === 'move') {
     steer(enemy, p.x, p.y, enemy.speed, 2.5, dt);
@@ -283,10 +286,12 @@ function updateBeetle(run, enemy, dt) {
 }
 
 function updateSnipper(run, enemy, dt) {
-  const thread = run.thread;
+  // With two needles out, the snipper hunts whichever thread is longer.
+  const thread = run.partner && run.partnerThread.length > run.thread.length ? run.partnerThread : run.thread;
   const points = thread.points;
-  let tx = run.player.x;
-  let ty = run.player.y;
+  const owner = thread === run.thread ? run.player : run.partner;
+  let tx = owner.x;
+  let ty = owner.y;
   if (points.length > 12) {
     const mid = points[Math.floor(points.length * 0.35)];
     tx = mid.x;
@@ -309,7 +314,7 @@ function updateSnipper(run, enemy, dt) {
 }
 
 function updateSpitter(run, enemy, dt) {
-  const p = run.player;
+  const p = nearestNeedle(run, enemy.x, enemy.y);
   if (!enemy.home) enemy.home = { x: run.rng.range(140, VIEW.width - 140), y: run.rng.range(120, VIEW.height - 120) };
   if (distance(enemy.x, enemy.y, enemy.home.x, enemy.home.y) > 10) steer(enemy, enemy.home.x, enemy.home.y, enemy.speed * 2, 3, dt);
   else if (run.rng.chance(dt * 0.25)) enemy.home = null;

@@ -1,24 +1,27 @@
 // The title screen: the stitched logo over the lit attract-mode quilt, the run's goal in one line,
-// the menu (New run, the mode and needle pickers, the Sampler), the controls, the best score, and
-// the Moth Matriarch waiting at the end of the road. Few words, all of them big.
+// the menu (New run, the mode and needle pickers, the Two Needles co-op switch, the Sampler), the
+// controls, the best score, and the Moth Matriarch waiting at the end of the road. Few words, all
+// of them big.
 import { FONT, PALETTE, VIEW } from '../core/config.js';
 import { MODES } from '../meta/modes.js';
 import { NEEDLES, isUnlocked } from '../meta/needles.js';
 import { drawNeedleShape } from '../render/sprites.js';
 import { drawPortrait } from '../render/portraits.js';
 import { codexCounts } from '../meta/codex.js';
+import { PARTNER } from '../coop/two-needles.js';
 import { drawFeltPanel, drawText, formatNumber } from './widgets.js';
 
 const MENU = { x: 56, y: 236, w: 560, h: 486 };
 
 export function titleLayout() {
   return {
-    start: { x: 84, y: 260, w: 504, h: 104 },
-    modePrev: { x: 84, y: 388, w: 64, h: 64 },
-    modeNext: { x: 524, y: 388, w: 64, h: 64 },
-    needlePrev: { x: 84, y: 474, w: 64, h: 64 },
-    needleNext: { x: 524, y: 474, w: 64, h: 64 },
-    sampler: { x: 84, y: 562, w: 504, h: 62 },
+    start: { x: 84, y: 254, w: 504, h: 94 },
+    modePrev: { x: 84, y: 364, w: 60, h: 56 },
+    modeNext: { x: 528, y: 364, w: 60, h: 56 },
+    needlePrev: { x: 84, y: 432, w: 60, h: 56 },
+    needleNext: { x: 528, y: 432, w: 60, h: 56 },
+    coop: { x: 84, y: 502, w: 504, h: 72 },
+    sampler: { x: 84, y: 588, w: 504, h: 52 },
   };
 }
 
@@ -38,7 +41,7 @@ export function drawLogo(ctx, x, y, size, time) {
   ctx.restore();
 }
 
-/** view: { best, time, modeIndex, needleIndex, progress, hover } */
+/** view: { best, time, modeIndex, needleIndex, progress, hover, coop } */
 export function drawTitle(ctx, view) {
   const { time } = view;
   const mode = MODES[view.modeIndex];
@@ -49,7 +52,7 @@ export function drawTitle(ctx, view) {
   drawMenu(ctx, view, mode);
   drawBoss(ctx, time);
   drawBest(ctx, mode, view.best);
-  drawControls(ctx);
+  drawControls(ctx, view.coop);
 }
 
 /** The attract-mode quilt stays lit on the right; a soft dark settles under the menu and logo. */
@@ -93,26 +96,66 @@ function drawMenu(ctx, view, mode) {
   ctx.restore();
 
   drawPicker(ctx, layout.modePrev, layout.modeNext, hover, 'modePrev', 'modeNext', PALETTE.navy);
-  drawText(ctx, mode.name.toUpperCase(), 336, 420, { size: 38, color: PALETTE.cream, outline: 6, font: FONT.plain });
+  drawText(ctx, mode.name.toUpperCase(), 336, 393, { size: 36, color: PALETTE.cream, outline: 6, font: FONT.plain });
 
   drawPicker(ctx, layout.needlePrev, layout.needleNext, hover, 'needlePrev', 'needleNext', PALETTE.teal);
   ctx.save();
-  ctx.translate(212, 506);
+  ctx.translate(206, 460);
   ctx.rotate(-0.35);
-  ctx.scale(1.25, 1.25);
+  ctx.scale(1.15, 1.15);
   ctx.globalAlpha = open ? 1 : 0.4;
   drawNeedleShape(ctx, needle.color);
   ctx.restore();
   ctx.globalAlpha = 1;
-  drawText(ctx, needle.name.replace(' Needle', '').toUpperCase(), 372, 506, { size: 32, color: open ? PALETTE.cream : PALETTE.steel, outline: 6, font: FONT.plain });
+  drawText(ctx, needle.name.replace(' Needle', '').toUpperCase(), 372, 460, { size: 30, color: open ? PALETTE.cream : PALETTE.steel, outline: 6, font: FONT.plain });
+
+  drawCoopToggle(ctx, layout.coop, view.coop, hover === 'coop', view.time);
 
   const { found, total } = codexCounts();
   const r = layout.sampler;
   drawFeltPanel(ctx, r.x, r.y, r.w, r.h, hover === 'sampler' ? PALETTE.thread : PALETTE.plum, 'rgba(246,236,214,0.6)', 14);
-  drawText(ctx, `SAMPLER  ${found}/${total}`, r.x + r.w / 2 - 20, r.y + r.h / 2 + 1, { size: 28, color: PALETTE.cream, outline: 5, font: FONT.plain });
+  drawText(ctx, `SAMPLER  ${found}/${total}`, r.x + r.w / 2 - 20, r.y + r.h / 2 + 1, { size: 26, color: PALETTE.cream, outline: 5, font: FONT.plain });
   drawText(ctx, 'C', r.x + r.w - 34, r.y + r.h / 2 + 1, { size: 20, color: PALETTE.gold, outline: 3, font: FONT.plain });
-  drawText(ctx, '↑↓ mode   ←→ needle', MENU.x + MENU.w / 2, 664, { size: 22, color: PALETTE.paper, outline: 0, font: FONT.plain });
+  drawText(ctx, '↑↓ mode   ←→ needle   2 co-op', MENU.x + MENU.w / 2, 666, { size: 22, color: PALETTE.paper, outline: 0, font: FONT.plain });
   drawText(ctx, mode.text, MENU.x + MENU.w / 2, 700, { size: 18, color: PALETTE.sky, outline: 0, weight: 'normal' });
+}
+
+/**
+ * The Two Needles switch: a red and a blue thread twisted between two needles, ON or OFF. With
+ * it on, a second player joins on the same keyboard (coop/two-needles.js).
+ */
+function drawCoopToggle(ctx, r, on, hover, time) {
+  drawFeltPanel(ctx, r.x, r.y, r.w, r.h, on ? '#1f5f99' : hover ? PALETTE.thread : '#3a2c46', on ? PALETTE.gold : 'rgba(246,236,214,0.5)', 14);
+  // Two threads braided across the left of the switch.
+  const x0 = r.x + 18;
+  const x1 = r.x + 128;
+  const cy = r.y + r.h / 2;
+  for (const [color, phase] of [[PALETTE.thread, 0], [PARTNER.thread, Math.PI]]) {
+    ctx.beginPath();
+    for (let x = x0; x <= x1; x += 4) {
+      const y = cy + Math.sin((x - x0) / 14 + phase + (on ? time * 3 : 0)) * 12;
+      if (x === x0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    }
+    ctx.strokeStyle = PALETTE.ink;
+    ctx.lineWidth = 7;
+    ctx.stroke();
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 4;
+    ctx.stroke();
+  }
+  ctx.save();
+  ctx.translate(x1 + 4, cy - 12);
+  ctx.rotate(-0.5);
+  drawNeedleShape(ctx, PALETTE.steel);
+  ctx.restore();
+  ctx.save();
+  ctx.translate(x1 + 4, cy + 12);
+  ctx.rotate(0.5);
+  drawNeedleShape(ctx, PARTNER.needle);
+  ctx.restore();
+  drawText(ctx, 'TWO NEEDLES', r.x + 300, cy - 11, { size: 30, color: PALETTE.cream, outline: 6, font: FONT.plain });
+  drawText(ctx, on ? 'CO-OP ON  ·  P2: ARROWS + ENTER' : 'CO-OP OFF  ·  press 2', r.x + 300, cy + 20, { size: 16, color: on ? PALETTE.gold : PALETTE.paper, outline: 3, font: FONT.plain });
 }
 
 /** The final boss, lit, at the end of the road: what the goal line names. */
@@ -136,9 +179,17 @@ const CONTROLS = [
   ['LOOP', 'cinch'],
 ];
 
+/** With Two Needles on: each player's keys, player one in red thread and player two in blue. */
+const COOP_CONTROLS = [
+  ['WASD', 'P1 move'],
+  ['MOUSE', 'P1 fire'],
+  ['ARROWS', 'P2 move'],
+  ['ENTER', 'P2 fire'],
+];
+
 /** The controls as four big key caps along the foot of the screen. */
-function drawControls(ctx) {
-  CONTROLS.forEach(([key, what], i) => {
+function drawControls(ctx, coop) {
+  (coop ? COOP_CONTROLS : CONTROLS).forEach(([key, what], i) => {
     const x = 56 + i * 300;
     const w = key.length > 4 ? 124 : 104;
     drawKeyCap(ctx, x, 742, w, key);

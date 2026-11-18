@@ -38,7 +38,7 @@ export function drawResults(ctx, summary, time) {
     ['Biggest loop', `${summary.biggestLoop} caught`],
     ['Cloth darned', `${summary.mended.toFixed(1)} patches`],
     ['Heirlooms kept', `${summary.heirlooms} / 8`],
-    ['Sequins earned', formatNumber(summary.sequins)],
+    summary.coop ? ['Bound loops (co-op)', formatNumber(summary.boundLoops)] : ['Sequins earned', formatNumber(summary.sequins)],
     ['Top combo', `x${summary.combo}`],
     ['Time', formatTime(summary.time)],
   ];

@@ -4,6 +4,7 @@
 import { VIEW } from '../core/config.js';
 import { angleDelta, clamp, TAU } from '../core/geometry.js';
 import { spawnEnemy } from './enemies.js';
+import { nearestNeedle } from '../coop/two-needles.js';
 import { spawnShot, spawnShotRing } from './projectiles.js';
 import { addShake, floatText, ring, screenFlash } from '../render/effects.js';
 
@@ -20,7 +21,7 @@ export function spawnWyrm(run) {
 }
 
 export function updateWyrmHead(run, head, dt) {
-  const p = run.player;
+  const p = nearestNeedle(run, head.x, head.y);
   head.timer -= dt;
   let tx = p.x;
   let ty = p.y;

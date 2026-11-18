@@ -15,6 +15,7 @@ export function darknessFor(depth) {
 /** Every light on the board this frame: {x, y, r}. */
 export function lightSources(run) {
   const lights = [{ x: run.player.x, y: run.player.y, r: 150 * run.mods.lightRadius }];
+  if (run.partner) lights.push({ x: run.partner.x, y: run.partner.y, r: 150 * run.mods.lightRadius });
   for (const candle of litCandles(run.quilt)) lights.push({ x: candle.cx, y: candle.cy, r: CANDLE_RADIUS, candle: true });
   for (const cinch of run.cinches) lights.push({ x: cinch.centre.x, y: cinch.centre.y, r: 220 * (1 - cinch.age / cinch.life) + 60 });
   return lights;

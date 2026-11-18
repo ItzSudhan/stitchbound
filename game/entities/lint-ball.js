@@ -3,10 +3,11 @@
 import { VIEW, PALETTE } from '../core/config.js';
 import { TAU } from '../core/geometry.js';
 import { spawnEnemy } from './enemies.js';
+import { nearestNeedle } from '../coop/two-needles.js';
 import { drawShadow, inked } from '../render/sprites.js';
 
 export function updateLintBall(run, enemy, dt) {
-  const p = run.player;
+  const p = nearestNeedle(run, enemy.x, enemy.y);
   const a = Math.atan2(p.y - enemy.y, p.x - enemy.x) + Math.sin(enemy.age * 2 + enemy.seed) * 0.8;
   enemy.vx += (Math.cos(a) * enemy.speed - enemy.vx) * Math.min(1, dt * 2);
   enemy.vy += (Math.sin(a) * enemy.speed - enemy.vy) * Math.min(1, dt * 2);

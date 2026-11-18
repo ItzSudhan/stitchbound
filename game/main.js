@@ -21,9 +21,12 @@ import { drawShop, shopLayout } from './ui/shop-screen.js';
 import { drawEvent, eventLayout } from './ui/event-screen.js';
 import { drawResults } from './ui/results-screen.js';
 import { drawPause } from './ui/pause-screen.js';
+import { drawCaption } from './ui/widgets.js';
 import { CODEX_BACK, drawCodex } from './ui/codex-screen.js';
 import { createPilot, pilotChooseCard, pilotChooseNode, pilotChooseOption, pilotChooseWare, pilotIntent } from './demo/autopilot.js';
 import { stageShot } from './demo/shots.js';
+import { partnerIntent } from './coop/partner-input.js';
+import { createPartnerPilot, duetIntents } from './coop/partner-pilot.js';
 import { createAudio } from './audio/mixer.js';
 import { createInput } from './core/input.js';
 import { bestScore, recordScore } from './core/storage.js';
@@ -59,6 +62,8 @@ const state = {
   modeIndex: 0,
   needleIndex: 0,
   progress: currentProgress(),
+  coop: params.get('coop') === '1',
+  partnerPilot: createPartnerPilot(),
 };
 
 let pixelScale = 1;
@@ -92,19 +97,21 @@ function bestForMode() {
 }
 
 function startDemo() {
-  const run = createRun({ seed: fixedSeed ?? 7 });
+  const run = createRun({ seed: fixedSeed ?? 7, coop: state.coop });
   run.immortal = true;
   enterNode(run, nextNodes(run)[0]);
   state.demoRun = run;
   state.pilot = createPilot();
+  state.partnerPilot = createPartnerPilot();
 }
 
 function startRun() {
   const mode = currentMode();
   const needle = NEEDLES[state.needleIndex];
   if (!isUnlocked(needle, state.progress)) return;
-  state.run = createRun({ seed: seedForMode(mode, fixedSeed), modeId: mode.id, needleId: needle.id });
+  state.run = createRun({ seed: seedForMode(mode, fixedSeed), modeId: mode.id, needleId: needle.id, coop: state.coop });
   state.pilot = createPilot();
+  state.partnerPilot = createPartnerPilot();
   state.endTimer = 0;
   setScreen('map');
   audio.play('start');
@@ -147,16 +154,31 @@ function finishRun() {
 }
 
 function playerIntent(run) {
-  if (autopiloted()) return pilotIntent(run, state.pilot, STEP);
-  const move = input.moveVector();
+  if (autopiloted()) {
+    const lead = pilotIntent(run, state.pilot, STEP);
+    if (!run.partner) return lead;
+    // The pincer flies both needles; player two's half is picked up by secondIntent.
+    const { first, second } = duetIntents(run, state.partnerPilot, state.pilot, lead, STEP);
+    state.duetSecond = second;
+    return first;
+  }
+  // In a Two Needles run the arrow keys and Right Shift belong to player two.
+  const move = input.moveVector(run.partner !== null);
   return {
     moveX: move.x,
     moveY: move.y,
     aimX: input.mouse.x,
     aimY: input.mouse.y,
     fire: input.mouse.down || input.isHeld('KeyJ'),
-    dash: input.anyPressed('Space', 'ShiftLeft', 'ShiftRight', 'MouseRight'),
+    dash: run.partner ? input.anyPressed('Space', 'ShiftLeft', 'MouseRight') : input.anyPressed('Space', 'ShiftLeft', 'ShiftRight', 'MouseRight'),
   };
+}
+
+/** Player two's intent in a Two Needles run: the arrow keys, Enter and Right Shift. */
+function secondIntent(run) {
+  if (!run.partner) return undefined;
+  if (autopiloted()) return state.duetSecond;
+  return partnerIntent(run, input);
 }
 
 function drainEvents(run) {
@@ -180,6 +202,13 @@ function handleMenus() {
       if (input.anyPressed('ArrowRight') || (m.clicked && state.hover === 'needleNext')) state.needleIndex = step(NEEDLES, state.needleIndex, 1);
       if (input.anyPressed('ArrowUp') || (m.clicked && state.hover === 'modePrev')) state.modeIndex = step(MODES, state.modeIndex, -1);
       if (input.anyPressed('ArrowDown') || (m.clicked && state.hover === 'modeNext')) state.modeIndex = step(MODES, state.modeIndex, 1);
+      if (input.anyPressed('Digit2', 'Numpad2', 'KeyT') || (m.clicked && state.hover === 'coop')) {
+        // Two Needles: the attract quilt switches at once, so the title shows the choice.
+        state.coop = !state.coop;
+        startDemo();
+        audio.play('select');
+        announce(state.coop ? 'Two Needles: player two takes the arrow keys, Enter and Right Shift.' : 'One needle.');
+      }
       if (input.anyPressed('KeyC') || (m.clicked && state.hover === 'sampler')) {
         setScreen('codex');
         audio.play('select');
@@ -282,7 +311,11 @@ function update(dt) {
   if (state.screen === 'title' || state.screen === 'codex') {
     if (!state.demoRun || state.demoRun.outcome || state.demoRun.wavePhase === 'draft') startDemo();
     const run = state.demoRun;
-    stepNight(run, pilotIntent(run, state.pilot, dt), dt);
+    const lead = pilotIntent(run, state.pilot, dt);
+    if (run.partner) {
+      const { first, second } = duetIntents(run, state.partnerPilot, state.pilot, lead, dt);
+      stepNight(run, first, dt, second);
+    } else stepNight(run, lead, dt);
     run.events.length = 0;
     audio.setMusic('calm');
     return;
@@ -290,7 +323,7 @@ function update(dt) {
   const run = state.run;
   if (state.screen === 'pause') return;
   if (state.screen === 'play') {
-    stepNight(run, playerIntent(run), dt);
+    stepNight(run, playerIntent(run), dt, secondIntent(run));
     drainEvents(run);
     audio.setMusic(run.enemies.some((e) => e.boss) ? 'boss' : 'calm');
     if (run.outcome) {
@@ -318,7 +351,7 @@ function render() {
   ctx.setTransform(pixelScale, 0, 0, pixelScale, 0, 0);
   if (state.screen === 'title') {
     drawScene(ctx, state.demoRun, t);
-    drawTitle(ctx, { best: bestForMode(), time: t, modeIndex: state.modeIndex, needleIndex: state.needleIndex, progress: state.progress, hover: state.hover });
+    drawTitle(ctx, { best: bestForMode(), time: t, modeIndex: state.modeIndex, needleIndex: state.needleIndex, progress: state.progress, hover: state.hover, coop: state.coop });
     return;
   }
   if (state.screen === 'codex') {
@@ -393,6 +426,7 @@ function stage(name) {
   if (scene.best) recordScore(currentMode().id, scene.best);
   render();
   render();
+  if (scene.caption) drawCaption(ctx, scene.caption, VIEW.width);
   window.__shotReady = true;
 }
 

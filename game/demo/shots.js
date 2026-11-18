@@ -2,6 +2,7 @@
 // real run of the game's own rules, played by the autopilot through the run driver and stopped
 // at the moment the scene names:
 //   cover  the Moth Matriarch fight at its busiest moment, a loop cinching
+//   coop   a Two Needles run: a bound loop of both threads closing around the Matriarch
 //   road   the quilt road, mid-run, with the path sewn so far
 //   draft  a notion draft where a card would complete a synergy
 //   shop   the Peddler's stall
@@ -13,6 +14,7 @@
 // same seed to the best frame: the run is deterministic, so the replay is the same game.
 import { driveRun } from './run-driver.js';
 import { summarizeRun } from '../run/summary.js';
+import { distance, pointInPolygon, polygonArea } from '../core/geometry.js';
 
 function replayToBest(options, score) {
   let bestStep = -1;
@@ -53,12 +55,35 @@ function coverScore(run) {
   return spectacle(run) - offCentre * 0.12 + (boss.spiralLeft > 0 ? 40 : 0) + (boss.hp / boss.maxHp) * 60 + spools + spacing;
 }
 
+/** The co-op shot: a fresh bound loop, the bigger and the more it holds the better, the Matriarch inside. */
+function coopScore(run) {
+  if (!run.partner) return -1;
+  const fresh = run.cinches.find((c) => c.bound && c.age > 0.02 && c.age < 0.16);
+  if (!fresh) return -1;
+  if (run.fx.flash > 0.12) return -1;
+  for (const n of [run.player, run.partner]) {
+    if (n.x < 40 || n.x > 1240 || n.y < 40 || n.y > 640) return -1;
+  }
+  // Best of all: the Matriarch herself inside the bound loop; else any boss in view, else pests.
+  const boss = run.enemies.find((e) => (e.kind === 'matriarch' || e.kind === 'wyrm') && !e.dead && !e.entering && e.x > 120 && e.x < 1160 && e.y > 170 && e.y < 620);
+  const holdsBoss = boss && pointInPolygon(boss.x, boss.y, fresh.polygon) ? 260 : 0;
+  const bossBonus = boss ? (boss.kind === 'matriarch' ? 200 : 120) : 0;
+  const apart = distance(run.player.x, run.player.y, run.partner.x, run.partner.y);
+  return holdsBoss + bossBonus + Math.min(200, Math.sqrt(polygonArea(fresh.polygon)) * 0.6) + fresh.caught * 25 + (apart > 160 ? 40 : 0) + spectacle(run) * 0.3;
+}
+
 export function stageShot(name, seed, needleId = 'steel') {
   const options = { seed, needleId };
   switch (name) {
     case 'cover': {
       const run = replayToBest(options, coverScore);
       return { screen: 'play', run, time: run.time };
+    }
+    case 'coop': {
+      // Two Needles: the Matriarch fight in a co-op run, as a bound loop of red and blue thread
+      // closes around her. Captioned, since it is the shot that names the feature.
+      const run = replayToBest({ ...options, coop: true }, coopScore);
+      return { screen: 'play', run, time: run.time, caption: 'TWO NEEDLES · LOCAL CO-OP' };
     }
     case 'wyrm': {
       const run = replayToBest(options, (r) => (r.depth === 5 && bossOnScreen(r, 'wyrm') ? spectacle(r) : -1));
