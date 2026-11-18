@@ -31,38 +31,37 @@ export function drawResults(ctx, summary, time) {
     drawText(ctx, 'NEW BEST!', 0, 1, { size: 26, color: PALETTE.cream, outline: 4 });
     ctx.restore();
   }
-  const stats = [
-    ['Night reached', summary.endless ? String(summary.night) : `${summary.night} / 10`],
-    ['Pests stitched', formatNumber(summary.kills)],
-    ['Loops closed', formatNumber(summary.loops)],
-    ['Biggest loop', `${summary.biggestLoop} caught`],
-    ['Cloth darned', `${summary.mended.toFixed(1)} patches`],
-    ['Heirlooms kept', `${summary.heirlooms} / 8`],
-    ['Sequins earned', formatNumber(summary.sequins)],
-    ['Top combo', `x${summary.combo}`],
-    ['Night goals met', String(summary.goals)],
-    ['Time', formatTime(summary.time)],
+  // Six big stat chips: few words, large numbers, readable even as a thumbnail.
+  const chips = [
+    ['NIGHT', summary.endless ? String(summary.night) : `${summary.night}/10`, PALETTE.navy],
+    ['PESTS', formatNumber(summary.kills), PALETTE.plum],
+    ['LOOPS', formatNumber(summary.loops), PALETTE.thread],
+    ['HEIRLOOMS', `${summary.heirlooms}/8`, PALETTE.goldDeep],
+    ['GOALS MET', String(summary.goals), PALETTE.teal],
+    ['TIME', formatTime(summary.time), PALETTE.terracotta],
   ];
-  stats.forEach(([label, value], i) => {
-    const y = py + 36 + i * 31;
-    drawText(ctx, label, px + 520, y, { size: 22, color: PALETTE.ink, align: 'left', outline: 0, weight: 'normal' });
-    drawText(ctx, value, px + 930, y, { size: 24, color: PALETTE.navy, align: 'right', outline: 0 });
+  chips.forEach(([label, value, color], i) => {
+    const x = px + 500 + (i % 3) * 156;
+    const y = py + 30 + Math.floor(i / 3) * 132;
+    drawFeltPanel(ctx, x, y, 144, 116, color, 'rgba(246,236,214,0.6)', 12);
+    drawText(ctx, value, x + 72, y + 52, { size: value.length > 4 ? 34 : 40, color: '#ffffff', outline: 5, font: FONT.plain });
+    drawText(ctx, label, x + 72, y + 94, { size: 17, color: PALETTE.cream, outline: 3, font: FONT.plain });
   });
-  drawText(ctx, 'SYNERGIES', px + 250, py + 214, { size: 22, color: PALETTE.terracotta, outline: 0 });
+  drawText(ctx, 'SYNERGIES', px + 250, py + 214, { size: 24, color: PALETTE.terracotta, outline: 0, font: FONT.plain });
   const names = summary.synergies.length > 0 ? summary.synergies.slice(0, 3) : ['none this run'];
-  names.forEach((name, i) => drawText(ctx, name, px + 250, py + 246 + i * 30, { size: 24, color: summary.synergies.length ? PALETTE.goldDeep : PALETTE.steelDark, outline: 0 }));
-  drawText(ctx, `THE BUILD  ·  ${summary.quiltName} quilt`, VIEW.width / 2, py + 362, { size: 20, color: PALETTE.terracotta, outline: 0 });
-  const kit = [...summary.relics.map((id) => ['relic', id]), ...summary.owned.map((id) => ['notion', id])].slice(0, 20);
-  const size = 40;
+  names.forEach((name, i) => drawText(ctx, name, px + 250, py + 250 + i * 36, { size: 30, color: summary.synergies.length ? PALETTE.goldDeep : PALETTE.steelDark, outline: 0, font: FONT.plain }));
+  drawText(ctx, `THE BUILD: ${summary.relics.length} relics, ${summary.owned.length} notions`, VIEW.width / 2, py + 372, { size: 22, color: PALETTE.terracotta, outline: 0, font: FONT.plain });
+  const kit = [...summary.relics.map((id) => ['relic', id]), ...summary.owned.map((id) => ['notion', id])].slice(0, 16);
+  const size = 50;
   let x = VIEW.width / 2 - (kit.length * (size + 6) - 6) / 2 + size / 2;
   for (const [kind, id] of kit) {
-    if (kind === 'relic') drawRelicIcon(ctx, relicById(id), x, py + 412, size);
-    else drawNotionIcon(ctx, notionById(id), x, py + 412, size);
+    if (kind === 'relic') drawRelicIcon(ctx, relicById(id), x, py + 428, size);
+    else drawNotionIcon(ctx, notionById(id), x, py + 428, size);
     x += size + 6;
   }
   if (summary.unlocked.length > 0) {
-    drawFeltPanel(ctx, px + 190, py + 446, 600, 44, '#2b1f33', PALETTE.gold, 12);
-    drawText(ctx, `UNLOCKED: ${summary.unlocked.join(', ')}!`, VIEW.width / 2, py + 469, { size: 22, color: PALETTE.gold, outline: 3 });
+    drawFeltPanel(ctx, px + 190, py + 462, 600, 44, '#2b1f33', PALETTE.gold, 12);
+    drawText(ctx, `UNLOCKED: ${summary.unlocked.join(', ')}!`, VIEW.width / 2, py + 485, { size: 22, color: PALETTE.gold, outline: 3 });
   }
   const pulse = 0.85 + 0.15 * Math.sin(time * 5);
   ctx.globalAlpha = pulse;
