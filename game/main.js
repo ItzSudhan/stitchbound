@@ -21,6 +21,7 @@ import { drawShop, shopLayout } from './ui/shop-screen.js';
 import { drawEvent, eventLayout } from './ui/event-screen.js';
 import { drawResults } from './ui/results-screen.js';
 import { drawPause } from './ui/pause-screen.js';
+import { CODEX_BACK, drawCodex } from './ui/codex-screen.js';
 import { createPilot, pilotChooseCard, pilotChooseNode, pilotChooseOption, pilotChooseWare, pilotIntent } from './demo/autopilot.js';
 import { stageShot } from './demo/shots.js';
 import { createAudio } from './audio/sound.js';
@@ -179,10 +180,19 @@ function handleMenus() {
       if (input.anyPressed('ArrowRight') || (m.clicked && state.hover === 'needleNext')) state.needleIndex = step(NEEDLES, state.needleIndex, 1);
       if (input.anyPressed('ArrowUp') || (m.clicked && state.hover === 'modePrev')) state.modeIndex = step(MODES, state.modeIndex, -1);
       if (input.anyPressed('ArrowDown') || (m.clicked && state.hover === 'modeNext')) state.modeIndex = step(MODES, state.modeIndex, 1);
+      if (input.anyPressed('KeyC') || (m.clicked && state.hover === 'sampler')) {
+        setScreen('codex');
+        audio.play('select');
+        break;
+      }
       if (confirm || (m.clicked && (!state.hover || state.hover === 'start')) || demo) startRun();
       if (input.anyPressed('ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown')) audio.play('select');
       break;
     }
+    case 'codex':
+      state.hover = inRect(m.x, m.y, CODEX_BACK) ? 'back' : null;
+      if (input.anyPressed('Escape', 'KeyC', 'Enter') || (m.clicked && state.hover === 'back')) setScreen('title');
+      break;
     case 'map': {
       const reachable = nextNodes(run);
       state.hover = visibleNodes(run).find((node) => reachable.includes(node) && inRect(m.x, m.y, nodeRect(run, node))) ?? null;
@@ -269,7 +279,7 @@ function autoMenus(dt) {
 function update(dt) {
   state.clock += dt;
   state.cardAge += dt;
-  if (state.screen === 'title') {
+  if (state.screen === 'title' || state.screen === 'codex') {
     if (!state.demoRun || state.demoRun.outcome || state.demoRun.wavePhase === 'draft') startDemo();
     const run = state.demoRun;
     stepNight(run, pilotIntent(run, state.pilot, dt), dt);
@@ -309,6 +319,11 @@ function render() {
   if (state.screen === 'title') {
     drawScene(ctx, state.demoRun, t);
     drawTitle(ctx, { best: bestForMode(), time: t, modeIndex: state.modeIndex, needleIndex: state.needleIndex, progress: state.progress, hover: state.hover });
+    return;
+  }
+  if (state.screen === 'codex') {
+    drawScene(ctx, state.demoRun, t);
+    drawCodex(ctx, t, state.hover);
     return;
   }
   const run = state.run;

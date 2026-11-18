@@ -4,7 +4,8 @@ import { FONT, PALETTE, VIEW } from '../core/config.js';
 import { MODES } from '../meta/modes.js';
 import { NEEDLES, isUnlocked } from '../meta/needles.js';
 import { drawNeedleShape } from '../render/sprites.js';
-import { dimScreen, drawFeltPanel, drawText, drawWrapped, formatNumber } from './widgets.js';
+import { codexCounts } from '../meta/codex.js';
+import { dimScreen, drawButton, drawFeltPanel, drawText, drawWrapped, formatNumber } from './widgets.js';
 
 export function titleLayout() {
   return {
@@ -13,6 +14,7 @@ export function titleLayout() {
     needlePrev: { x: 650, y: 486, w: 56, h: 56 },
     needleNext: { x: 1134, y: 486, w: 56, h: 56 },
     start: { x: 390, y: 650, w: 500, h: 70 },
+    sampler: { x: 90, y: 656, w: 270, h: 60 },
   };
 }
 
@@ -76,6 +78,8 @@ export function drawTitle(ctx, view) {
   if (open) drawText(ctx, needle.text, 920, 590, { size: 19, color: PALETTE.terracotta, outline: 0, weight: 'normal' });
   else drawText(ctx, `LOCKED: ${needle.unlock.text}`, 920, 590, { size: 21, color: PALETTE.danger, outline: 0 });
 
+  const { found, total } = codexCounts();
+  drawButton(ctx, layout.sampler, `SAMPLER (C) ${found}/${total}`, { hover: view.hover === 'sampler', size: 21, fill: PALETTE.plum });
   const pulse = 0.88 + 0.12 * Math.sin(time * 5);
   drawFeltPanel(ctx, layout.start.x, layout.start.y, layout.start.w, layout.start.h, view.hover === 'start' ? PALETTE.thread : PALETTE.terracotta, 'rgba(246,236,214,0.7)', 16);
   ctx.globalAlpha = pulse;

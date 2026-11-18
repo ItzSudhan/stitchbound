@@ -24,6 +24,11 @@ try {
   await chrome.goto(`http://127.0.0.1:${PORT}/?seed=5`);
   await chrome.waitFor('window.__stitch && window.__stitch.state.screen === "title"');
   check('title screen shows', true);
+  await chrome.key('KeyC');
+  await waitScreen('codex');
+  check('C opens the Sampler', true);
+  await chrome.key('Escape');
+  await waitScreen('title');
   await chrome.key('ArrowDown');
   await sleep(300);
   check('arrow keys change the mode', (await S('s.modeIndex')) === 1, `mode ${await S('s.modeIndex')}`);
@@ -112,6 +117,7 @@ try {
   await waitScreen('over', 60000);
   const lost = await S('s.summary.outcome');
   check('standing still loses the run', lost === 'needle' || lost === 'quilt', lost);
+  check('the Sampler records pests met', (await chrome.evaluate('JSON.parse(localStorage.getItem("stitchbound.v2")).codex.pests.length')) > 0);
   check('run progress is saved', (await chrome.evaluate('JSON.parse(localStorage.getItem("stitchbound.v2")).progress.runs')) >= 1);
   await chrome.waitFor('window.__stitch.state.endTimer > 0.8');
   await chrome.key('Enter');

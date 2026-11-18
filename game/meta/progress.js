@@ -2,6 +2,7 @@
 // finished run adds to the tally; the needles it newly unlocks are returned for the results card.
 import { loadSave, writeSave } from '../core/storage.js';
 import { NEEDLES, isUnlocked } from './needles.js';
+import { recordDiscoveries } from './codex.js';
 
 export function currentProgress() {
   return loadSave().progress;
@@ -19,5 +20,6 @@ export function recordRunProgress(run) {
   if (run.outcome === 'win') p.wins += 1;
   if (run.endless) p.endlessBest = Math.max(p.endlessBest, run.depth);
   writeSave(save);
+  recordDiscoveries(run);
   return NEEDLES.filter((n) => !isUnlocked(n, before) && isUnlocked(n, p));
 }
