@@ -72,8 +72,8 @@ function coopScore(run) {
   return holdsBoss + bossBonus + Math.min(200, Math.sqrt(polygonArea(fresh.polygon)) * 0.6) + fresh.caught * 25 + (apart > 160 ? 40 : 0) + spectacle(run) * 0.3;
 }
 
-export function stageShot(name, seed, needleId = 'steel') {
-  const options = { seed, needleId };
+export function stageShot(name, seed, needleId = 'steel', coop = false) {
+  const options = { seed, needleId, coop };
   switch (name) {
     case 'cover': {
       const run = replayToBest(options, coverScore);

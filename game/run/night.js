@@ -131,7 +131,9 @@ export function cinchLoop(run, polygon, power = 1) {
   if (bound) run.stats.boundLoops = (run.stats.boundLoops ?? 0) + 1;
   run.stats.mended += mended;
   run.stats.biggestLoop = Math.max(run.stats.biggestLoop, caught);
-  run.cinches.push({ polygon, centre, caught, bound, age: 0, life: bound ? 0.5 : 0.38 });
+  // span: how far the loop reaches from its centre, for the light a bound loop gives off.
+  const span = bound ? Math.max(...polygon.map((pt) => distance(pt.x, pt.y, centre.x, centre.y))) * 1.15 : 0;
+  run.cinches.push({ polygon, centre, caught, bound, span, age: 0, life: bound ? 0.5 : 0.38 });
   for (let i = 0; i < polygon.length; i += 3) {
     burst(fx, polygon[i].x, polygon[i].y, { count: 1, colors: [PALETTE.gold, PALETTE.threadLight], speed: 60, size: 6, kind: 'spark', life: 0.5 });
   }

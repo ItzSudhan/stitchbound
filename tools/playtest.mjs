@@ -145,6 +145,93 @@ try {
   await chrome.key('Escape');
   await waitScreen('title');
   check('Escape on results returns to the title', true);
+
+  // Two Needles: local co-op on one keyboard.
+  await chrome.key('Digit2');
+  await chrome.waitFor('window.__stitch.state.coop === true', 5000).catch(() => {});
+  await sleep(100);
+  check('2 on the title switches Two Needles on', (await S('s.coop')) === true && (await S('s.demoRun.partner !== null')) === true);
+  await chrome.key('Enter');
+  await waitScreen('map');
+  await chrome.key('Digit1');
+  await waitScreen('play');
+  check('a Two Needles run has a second needle and thread', (await S('s.run.partner !== null && s.run.partnerThread.points.length >= 1')) === true);
+  const p1x = await S('s.run.player.x');
+  const p2x = await S('s.run.partner.x');
+  const pins0 = await S('s.run.stats.kills + s.run.pins.length');
+  await chrome.key('ArrowLeft', 'down');
+  await chrome.key('Enter', 'down');
+  // Headless frames can run slow: hold the keys until player two has travelled, up to 10 s.
+  await chrome.waitFor(`window.__stitch.state.run.partner.x < ${p2x - 90}`, 10000).catch(() => {});
+  const pinsHeld = await S('s.run.pins.length');
+  await chrome.key('ArrowLeft', 'up');
+  await chrome.key('Enter', 'up');
+  check('the arrow keys move player two, not player one', p2x - (await S('s.run.partner.x')) > 30 && Math.abs((await S('s.run.player.x')) - p1x) < 5, `P2 ${Math.round(p2x)} -> ${Math.round(await S('s.run.partner.x'))}, P1 ${Math.round(p1x)} -> ${Math.round(await S('s.run.player.x'))}, ${await S('s.screen')}`);
+  check('Enter fires player two\'s pins', pinsHeld > 0 || (await S('s.run.stats.kills')) > pins0, `${pinsHeld} pins in flight`);
+  check('player two lays a blue thread of its own', (await S('s.run.partnerThread.points.length')) > 5);
+  check('Enter in a night does not leave the night', (await S('s.screen')) === 'play');
+
+  const bound = await chrome.evaluate(`(async () => {
+    const { createRun, enterNode, nextNodes } = await import('./run/run.js');
+    const { stepNight } = await import('./run/night.js');
+    const { spawnEnemy } = await import('./entities/enemies.js');
+    const { pointInPolygon } = await import('./core/geometry.js');
+    const still = { moveX: 0, moveY: 0, aimX: 640, aimY: 400, fire: false, dash: false };
+    // Two needles circle a beetle the opposite way round, the second weaving across the first's
+    // path half a beat behind: their threads cross on one side of it, then on the other.
+    function sew(coop) {
+      const run = createRun({ seed: 3, coop });
+      enterNode(run, nextNodes(run)[0]);
+      run.spawnQueue = [];
+      run.enemies = [];
+      const beetle = spawnEnemy(run, 'beetle', 640, 400);
+      beetle.speed = 0;
+      beetle.timer = 999;
+      beetle.hp = 100000;
+      const hp = beetle.hp;
+      let firstBound = null;
+      for (let t = -0.4; t < 4.2; t += 0.012) {
+        const u = t - 0.55;
+        const place = (n, a, r) => { n.x = 640 + Math.cos(a) * r; n.y = 400 + Math.sin(a) * r; n.vx = 0; n.vy = 0; };
+        place(run.player, t, 170);
+        if (run.partner) place(run.partner, -u, 170 + 36 * Math.sin(u));
+        stepNight(run, still, 1 / 60, still);
+        firstBound = firstBound ?? run.cinches.find((c) => c.bound) ?? null;
+      }
+      return {
+        bound: run.stats.boundLoops ?? 0,
+        aroundBeetle: firstBound ? pointInPolygon(640, 400, firstBound.polygon) : false,
+        beetleHit: hp - Math.max(0, beetle.hp),
+        loopDamage: run.mods.loopDamage,
+      };
+    }
+    return { duo: sew(true), solo: sew(false) };
+  })()`);
+  check('crossing the partner\'s thread twice closes a bound loop', bound.duo.bound >= 1, JSON.stringify(bound.duo));
+  check('the bound loop runs all the way round what the needles circled', bound.duo.aroundBeetle === true);
+  check('a bound loop cinches twice as hard as a single loop', bound.duo.beetleHit === bound.duo.loopDamage * 2 * bound.duo.bound, `${bound.duo.beetleHit} damage, loop ${bound.duo.loopDamage}`);
+  check('one needle alone on the same path closes no bound loop', bound.solo.bound === 0);
+
+  await chrome.evaluate('window.__stitch.pilotOn = true; window.__stitch.state.run.immortal = true');
+  await hook('fastForward(60, "cards")');
+  check('the co-op autopilot (the pincer) closes bound loops in a real night', (await S('s.run.stats.boundLoops')) > 0, `${await S('s.run.stats.boundLoops')} bound loops`);
+  await chrome.evaluate('window.__stitch.pilotOn = false; window.__stitch.state.run.immortal = false');
+  for (let i = 0; i < 3 && (await S('s.screen')) === 'cards'; i += 1) {
+    await sleep(600);
+    await chrome.key('Digit1');
+    await sleep(300);
+  }
+  if ((await S('s.screen')) !== 'play') await hook('enterDepth(2)');
+  await chrome.evaluate('window.__stitch.state.run.player.hp = 0');
+  await hook('fastForward(3, "over")');
+  await waitScreen('over');
+  check('the co-op results card counts bound loops', (await S('s.summary.coop && s.summary.boundLoops > 0')) === true, `${await S('s.summary.boundLoops')}`);
+  await chrome.key('Escape');
+  await waitScreen('title');
+  await chrome.key('Digit2');
+  await chrome.waitFor('window.__stitch.state.coop === false', 5000).catch(() => {});
+  check('2 again switches back to one needle', (await S('s.coop')) === false);
+
   await chrome.key('ArrowDown');
   await sleep(400);
   await chrome.key('ArrowDown');

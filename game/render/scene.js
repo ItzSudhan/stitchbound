@@ -55,8 +55,8 @@ export function drawScene(ctx, run, time, { needle = true } = {}) {
   if (needle && (!run.outcome || run.outcome === 'win' || run.outcome === 'quilt')) {
     for (const b of buttonPositions(run)) drawGuardButton(ctx, b.x, b.y);
     drawNeedle(ctx, run.player, time, needleById(run.needleId).color);
-    if (run.partner) {
-      drawNeedle(ctx, run.partner, time, PARTNER.needle);
+    if (run.partner) drawNeedle(ctx, run.partner, time, PARTNER.needle);
+    if (run.partner && !run.outcome) {
       // Who is who: a small tag over each needle in its thread's colour.
       drawText(ctx, 'P1', run.player.x, run.player.y - 36, { size: 18, color: PALETTE.threadLight, outline: 4, font: FONT.plain });
       drawText(ctx, 'P2', run.partner.x, run.partner.y - 36, { size: 18, color: PARTNER.threadLight, outline: 4, font: FONT.plain });
@@ -221,16 +221,17 @@ function drawCinches(ctx, run) {
     ctx.closePath();
     ctx.fillStyle = `rgba(245,197,66,${0.45 * (1 - t)})`;
     ctx.fill();
+    // A bound loop is pulled by both needles: a thick cord of red and blue twisted together.
+    const cord = cinch.bound ? 1.6 : 1;
     ctx.strokeStyle = PALETTE.ink;
-    ctx.lineWidth = 10;
+    ctx.lineWidth = 10 * cord;
     ctx.stroke();
     ctx.strokeStyle = PALETTE.thread;
-    ctx.lineWidth = 6.5;
+    ctx.lineWidth = 6.5 * cord;
     ctx.stroke();
     if (cinch.bound) {
-      // A bound loop is pulled by both needles: red and blue thread twisted together.
       ctx.strokeStyle = PARTNER.thread;
-      ctx.setLineDash([14, 14]);
+      ctx.setLineDash([16, 16]);
       ctx.stroke();
     }
     ctx.strokeStyle = PALETTE.gold;

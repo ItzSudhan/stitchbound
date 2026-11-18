@@ -414,7 +414,7 @@ function pauseOnBlur() {
 
 function stage(name) {
   const needle = params.get('needle') ?? 'steel';
-  const scene = stageShot(name, fixedSeed ?? 1, needle);
+  const scene = stageShot(name, fixedSeed ?? 1, needle, state.coop);
   if (!scene) return;
   state.clock = scene.time;
   state.screen = scene.screen;
